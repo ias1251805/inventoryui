@@ -6,12 +6,14 @@ import { map, finalize } from 'rxjs/operators';
 
 import { environment } from '@environments/environment';
 import { Account } from '@app/_models';
+import { Item } from '@app/_models';
 
-const baseUrl = `${environment.apiUrl}/accounts`;
+const baseUrl = `${environment.apiUrl}` + '/account';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
     private accountSubject: BehaviorSubject<Account>;
+    private itemSubject: BehaviorSubject<Item>;
     public account: Observable<Account>;
 
     constructor(
@@ -26,12 +28,16 @@ export class AccountService {
         return this.accountSubject.value;
     }
 
+    public get itemValue(): Item {
+        return this.itemSubject.value;
+    }
+
     login(email: string, password: string) {
-        return this.http.post<any>(`${baseUrl}/authenticate`, { email, password }, { withCredentials: true })
+        return this.http.post<any>(baseUrl + "/authenticate", { email, password }, { withCredentials: false })
             .pipe(map(account => {
                 this.accountSubject.next(account);
                 this.startRefreshTokenTimer();
-                return account;
+                return this.account;
             }));
     }
 
@@ -43,7 +49,7 @@ export class AccountService {
     }
 
     refreshToken() {
-        return this.http.post<any>(`${baseUrl}/refresh-token`, {}, { withCredentials: true })
+        return this.http.post<any>(`${baseUrl}/refresh-token`, {}, { withCredentials: false })
             .pipe(map((account) => {
                 this.accountSubject.next(account);
                 this.startRefreshTokenTimer();
@@ -72,11 +78,15 @@ export class AccountService {
     }
 
     getAll() {
-        return this.http.get<Account[]>(baseUrl);
+        return this.http.get<Account[]>(`${baseUrl}/get-accounts`,{ withCredentials: false });
+    }
+
+    getAllItems() {
+        return this.http.get<Account[]>(`${baseUrl}/getAllItems`,{ withCredentials: false });
     }
 
     getById(id: string) {
-        return this.http.get<Account>(`${baseUrl}/${id}`);
+        return this.http.get<Account>(`${baseUrl}/get-account-id?id=${id}`);
     }
     
     create(params) {

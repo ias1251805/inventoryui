@@ -23,11 +23,14 @@ export class AddEditComponent implements OnInit {
     ) {}
 
     ngOnInit() {
+
+        console.log("entering to edit account")
+        
         this.id = this.route.snapshot.params['id'];
+        console.log(this.id)
         this.isAddMode = !this.id;
 
         this.form = this.formBuilder.group({
-            title: ['', Validators.required],
             firstName: ['', Validators.required],
             lastName: ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
