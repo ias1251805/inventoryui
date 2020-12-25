@@ -1,5 +1,6 @@
 ﻿
-
+import { ItemCategory } from './itemCategory';
+import { ItemDetails } from './itemDetails';
 export class Item {
     itemId: string;
     name: string;
@@ -12,4 +13,6 @@ export class Item {
     mediumImage: string;
     largeImage: string;
     quantity: string;
+    itemDetails: ItemDetails[];
+    category: ItemCategory; 
 }

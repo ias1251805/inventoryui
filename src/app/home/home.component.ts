@@ -4,7 +4,7 @@ import { AccountService } from '@app/_services';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { first } from 'rxjs/operators';
-import { Item } from '@app/_models';
+import { Item, ItemDetails } from '@app/_models';
 import { Observable } from 'rxjs';
 
 
@@ -29,6 +29,11 @@ export class HomeComponent {
     itemDescription: ''
     itemList: any[];
     public itemSearch: Item;
+
+
+    public itemDetailsModalTotalStock: number;
+    public itemDetailsModalItemId: number;
+
     value: string;
 
 
@@ -74,6 +79,16 @@ export class HomeComponent {
         this.modalService.open(content, { centered: true });
       }
 
+
+      getTotalQuantity(itemDetails: ItemDetails[]){
+        let totalQuantity = 0;
+
+        for(let data of itemDetails){
+            totalQuantity += Number(data.quantity);
+        }
+        return totalQuantity;
+      }
+
     getItemDataUPC(){
         this.accountService.getItem(this.formUPCSearch.upcText.value)
         .pipe(first())
@@ -91,8 +106,16 @@ export class HomeComponent {
     openModal(targetModal, item) {
 
         
+
         this.imageSrcModal = item.largeImage;
         this.itemDescription = item.shortDescription;
+        this.itemDetailsModalTotalStock = -1;
+        if(item.itemDetails){
+            this.itemDetailsModalTotalStock = this.getTotalQuantity(item.itemDetails);
+        }
+        
+        this.itemDetailsModalItemId = item.itemId
+
         this.modalService.open(targetModal, {
          centered: true,
          backdrop: 'static',

@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   //apiUrl: 'http://localhost:4000'
-  apiUrl: 'https://inventoryapi.pihome.cloud'
+  apiUrl: 'http://localhost:8080'
 };
 
 /*
