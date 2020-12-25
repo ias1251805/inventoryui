@@ -11,4 +11,5 @@ export class Item {
     thumbnailImage: string;
     mediumImage: string;
     largeImage: string;
+    quantity: string;
 }

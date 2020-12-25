@@ -1,18 +1,150 @@
 ﻿
-    <div class="col-md-7 mx-auto">
-        <h1>Hi {{account.firstName}}!</h1>  
-        
+ <div class="container max-height: 100%">
+
+ 
+
+<div class="card shadow p-3 mb-5 bg-white rounded" style="margin-top: 40px; margin-bottom:80px;;">
+  
+  <div class="card-header" >
+   
+    <h2 class="text-sm-left text-center">List of Items</h2>
+   
+  </div>
+  <form [formGroup]="formFilter" (ngSubmit)="getItemDataUPC();">
+    <div class="form-group form-inline" style="margin-top: 30px;">
+    <h6 class="mr-3">Text search:</h6> <input class="form-control shadow-none" type="text" />
+    </div>
+  </form>
+<div class="card-body col-md-12 ">
+
+
+  
+    
+  
+ 
+  <div class="row justify-content-center">
+    
+    
+    <table class="table table-hover ">
+     <thead>
+      <tr>
+       <th class="" scope="col">#</th>
+       <th scope="col">Name</th>
+       <th scope="col">Price</th>
+       <th class="text-center" scope="col">Stock</th>
+       <th class="text-center d-none d-sm-table-cell" scope="col">UPC</th>
+       <th class="text-center d-none d-sm-table-cell" scope="col">Link to Item</th>
+       <th class="text-center" scope="col">Image</th>      
+      </tr>
+     </thead>
+     <tbody>
+      <tr *ngFor="let item of itemList" (click)="openModal(editItemModal, item)" style = "cursor: pointer;">
+       <th class= "" scope="row">{{ item.itemId }}</th>
+       <td>{{ item.name.split(",")[0]}}</td>
+       <td >{{ item.salePrice  | currency}}</td>
+       <td class="text-center">{{ item.quantity }}</td>
+       <td class="text-center d-none d-sm-table-cell">{{ item.upc }}</td>
+       <td class="text-center d-none d-sm-table-cell">Link</td>
+       <td class=" text-center"><img src="data:image/png;base64,{{item.thumbnailImage}}" width="40" height="35" class="img-thumbnail" /></td>
+      </tr>
+      <tr *ngIf="!itemList">
+        <td colspan="4" class="text-center">
+            <span class="spinner-border spinner-border-lg align-center"></span>
+        </td>
+    </tr>
+     </tbody>
+    </table>
+   
+  
+
+
+
+
+ </div>
+
+
+
+
+ <ng-template #editItemModal let-modal>
+  <div class="modal-header">
+   <h5 class="modal-title" id="editItemLabel">Item Details</h5>
+   <button type="button" class="close" (click)="modal.dismiss()" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+   </button>
+  </div>
+  
+  <div class="modal-body">
+   <form [formGroup]="editItemForm" (ngSubmit)="onSubmit()">
+
+
+
+
+
+  <div class="input-group input-group-sm mb-3">
+    <div class="input-group-prepend">
+      <span class="input-group-text" id="name">Name</span>
+    </div>
+    <input type="text" class="form-control shadow-none" formControlName="name" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+  </div>
+
+  <div class="d-flex ">
+
+  <div id='containerElements' style="margin-top: 18px;">
+
+
+
+
+    <div class="input-group input-group-sm mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="salePrice">Sale Price</span>
+      </div>
+      <input type="text" class="form-control shadow-none" formControlName="salePrice" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
     </div>
 
 
 
-<div class="card col-md-9 mx-auto">
+
+
+    <div class="input-group input-group-sm mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="upc">UPC</span>
+      </div>
+      <input type="text" class="form-control shadow-none" formControlName="upc" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+    </div>
+
+
+     <div class="input-group input-group-sm mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="brandName">Brand</span>
+      </div>
+      <input type="text" class="form-control shadow-none" formControlName="brandName" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+    </div>
+
+  </div>
 
 
 
-    <div class="card-body">
-adsdasdasd
 
-     asdasdasdasd
+    <div class="col-sm-3"  style="margin-left: auto;margin-bottom:18px">
+      <img class="card-img-top"  src="data:image/png;base64,{{imageSrcModal}}"  alt="Card image cap">
+    </div>
+  </div>
+
+    <div class="input-group input-group-sm mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="shortDescription">Description</span>
+      </div>
+      <textarea class="form-control shadow-none" formControlName="shortDescription" aria-label="Small" aria-describedby="inputGroup-sizing-sm"></textarea>
+    </div>
+     
+
+    <div class="modal-footer">
+     <button type="button" class="btn btn-secondary" (click)="modal.dismiss()" autofocus>Close</button>
+     <button type="submit" class="btn btn-primary">Save changes</button>
+    </div>
+   </form>
+  </div>
+ </ng-template>
+   
     </div>
   </div>

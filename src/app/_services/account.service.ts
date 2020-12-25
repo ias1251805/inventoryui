@@ -82,7 +82,11 @@ export class AccountService {
     }
 
     getAllItems() {
-        return this.http.get<Account[]>(`${baseUrl}/getAllItems`,{ withCredentials: false });
+        return this.http.get<Item[]>(`${environment.apiUrl}/products/getAllItems`,{ withCredentials: false });
+    }
+
+    getItem(UPC: string) {
+        return this.http.get<Item>(`${environment.apiUrl}/products/getItemDetailsByUPC?UPC=${UPC}`,{ withCredentials: false });
     }
 
     getById(id: string) {
