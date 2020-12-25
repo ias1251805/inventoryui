@@ -14,10 +14,13 @@ import { Observable } from 'rxjs';
 styleUrls: ['./home.component.css'] })
 export class HomeComponent {
     formSearch: FormGroup;
+    searchUPCForm: FormGroup;
+
+
     
-
-
     @ViewChild('editItemModal', {static: false})
+
+
     private detailgrid: TemplateRef<any>;
     account = this.accountService.accountValue; 
     title = 'modal2';
@@ -37,14 +40,19 @@ export class HomeComponent {
 
     // convenience getter for easy access to form fields
     get f() { return this.formSearch.controls; }
+    get formUPCSearch() { return this.searchUPCForm.controls; }
+    get formItemDetails() { return this.editItemForm.controls; }
 
     ngOnInit() {
-
+        
         this.formSearch = this.fb.group({
             searchtxt: ['']
         });
 
-
+        this.searchUPCForm = this.fb.group({
+            upcText: ['']
+        });
+        
         this.accountService.getAllItems()
             .pipe(first())
             .subscribe(itemList => this.itemList = itemList);
@@ -60,27 +68,28 @@ export class HomeComponent {
     }
 
     openVerticallyCentered(content) {
-
+        
        
-
+       
         this.modalService.open(content, { centered: true });
       }
 
     getItemDataUPC(){
-        this.accountService.getItem(this.f.searchtxt.value)
+        this.accountService.getItem(this.formUPCSearch.upcText.value)
         .pipe(first())
         .subscribe(resp => {
 
          this.itemSearch = resp
+
+
          this.openModal(this.detailgrid, this.itemSearch);
-         
+         this.formUPCSearch.upcText.setValue("");
         });
-        this.f.searchtxt.setValue('');
+        
     }
 
     openModal(targetModal, item) {
 
-        console.log('printing from function' + item);
         
         this.imageSrcModal = item.largeImage;
         this.itemDescription = item.shortDescription;
@@ -102,6 +111,12 @@ export class HomeComponent {
             
 
            });
+           this.formItemDetails.name.disable();
+           this.formItemDetails.salePrice.disable();
+           this.formItemDetails.upc.disable();
+           this.formItemDetails.brandName.disable();
+           this.formItemDetails.shortDescription.disable();
+       
         }
 
         onSubmit() {
