@@ -59,6 +59,13 @@ export class HomeComponent {
                });
     }
 
+    openVerticallyCentered(content) {
+
+       
+
+        this.modalService.open(content, { centered: true });
+      }
+
     getItemDataUPC(){
         this.accountService.getItem(this.f.searchtxt.value)
         .pipe(first())
