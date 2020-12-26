@@ -156,6 +156,15 @@
       </div>
       <textarea class="form-control shadow-none" formControlName="shortDescription" aria-label="Small" aria-describedby="inputGroup-sizing-sm"></textarea>
     </div>
+
+    <div *ngIf="itemDetailsModalTotalStock>0"  class="input-group input-group-sm mb-3" >
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="expirationDateSelect">Expiration Date</span>
+      </div>
+      <select class="form-control shadow-none" formControlName="expirationDateSelect" id="expirationDateSelect" aria-label="Small" aria-describedby="inputGroup-sizing-sm" >
+        <option *ngFor="let itemDetailsCurrent of itemDetails; let i = index" [value]="itemDetails[i].expirationDate">{{itemDetails[i].expirationDate | date: 'dd/MM/yyyy'}}</option>
+      </select>
+    </div>
      
 
     <div class="modal-footer" style="padding-left: 0;padding-right: 0;">

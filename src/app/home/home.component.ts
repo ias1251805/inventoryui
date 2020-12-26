@@ -33,6 +33,7 @@ export class HomeComponent {
 
     public itemDetailsModalTotalStock: number;
     public itemDetailsModalItemId: number;
+    public itemDetails: ItemDetails[];
 
     value: string;
 
@@ -68,7 +69,8 @@ export class HomeComponent {
                 salePrice: [''],
                 upc: [''],
                 shortDescription: [''],
-                brandName: ['']
+                brandName: [''],
+                expirationDateSelect: ['']
                });
     }
 
@@ -110,8 +112,11 @@ export class HomeComponent {
         this.imageSrcModal = item.largeImage;
         this.itemDescription = item.shortDescription;
         this.itemDetailsModalTotalStock = -1;
+
         if(item.itemDetails){
             this.itemDetailsModalTotalStock = this.getTotalQuantity(item.itemDetails);
+            this.itemDetails = item.itemDetails;
+           
         }
         
         this.itemDetailsModalItemId = item.itemId
