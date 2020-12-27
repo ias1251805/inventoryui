@@ -1,4 +1,5 @@
 ﻿
+import { SignatureHelpRetriggeredReason } from 'typescript';
 import { ItemCategory } from './itemCategory';
 import { ItemDetails } from './itemDetails';
 export class Item {
@@ -13,6 +14,6 @@ export class Item {
     mediumImage: string;
     largeImage: string;
     quantity: string;
-    itemDetails: ItemDetails[];
     category: ItemCategory; 
+    sellingPrice: string;
 }

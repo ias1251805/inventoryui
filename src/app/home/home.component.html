@@ -94,8 +94,8 @@
 
   
   
-  <div class="modal-body">
-   <form [formGroup]="editItemForm" (ngSubmit)="onSubmit()">
+  <div class="modal-body" >
+   <form [formGroup]="editItemForm" >
 
     
 
@@ -107,11 +107,23 @@
     <input type="text" class="form-control shadow-none" formControlName="name" aria-label="Small" aria-describedby="inputGroup-sizing-sm" >
   </div>
 
+
+
+
   <div class="d-flex ">
 
-  <div id='containerElements' style="margin-top: 18px;">
+  <div id='containerElements'  >
 
 
+    
+
+    
+    <div *ngIf="itemDetailsModalTotalStock>=0 && !processingAddDatabase" class="input-group input-group-sm mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="category">Category</span>
+      </div>
+      <input type="text" class="form-control shadow-none" formControlName="category" aria-label="Small" aria-describedby="inputGroup-sizing-sm" >
+    </div>
 
 
     <div class="input-group input-group-sm mb-3">
@@ -121,7 +133,12 @@
       <input   type="text" class="form-control shadow-none" formControlName="salePrice" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
     </div>
 
-
+    <div *ngIf="itemDetailsModalTotalStock>=0 || processingAddDatabase" class="input-group input-group-sm mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="sellingPrice">Selling Price</span>
+      </div>
+      <input   type="text" class="form-control shadow-none" formControlName="sellingPrice" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+    </div>
 
 
 
@@ -145,7 +162,7 @@
 
 
 
-    <div class="col-sm-3"  style="margin-left: auto;margin-bottom:18px">
+    <div class="col-sm-3"  style="margin-left: auto;margin-bottom:18px; padding-top:30px">
       <img class="card-img-top"  src="data:image/png;base64,{{imageSrcModal}}"  alt="Card image cap">
     </div>
   </div>
@@ -162,15 +179,18 @@
         <span class="input-group-text" id="expirationDateSelect">Expiration Date</span>
       </div>
       <select class="form-control shadow-none" formControlName="expirationDateSelect" id="expirationDateSelect" aria-label="Small" aria-describedby="inputGroup-sizing-sm" >
-        <option *ngFor="let itemDetailsCurrent of itemDetails; let i = index" [value]="itemDetails[i].expirationDate">{{itemDetails[i].expirationDate | date: 'dd/MM/yyyy'}}</option>
+        <option *ngFor="let itemDetailsCurrent of expirationDates; let i = index" [value]="expirationDates[i].expirationDate">{{expirationDates[i]}}</option>
       </select>
     </div>
-     
+  
+
 
     <div class="modal-footer" style="padding-left: 0;padding-right: 0;">
      <button type="button" class="btn btn-secondary" style="margin-right: auto;" (click)="modal.dismiss()" autofocus>Close</button>
-     <button type="submit" class="btn btn-success">+ Add</button>
-     <button type="submit" class="btn btn-danger" [disabled]="itemDetailsModalTotalStock<=0">- Deduct</button>
+     <button *ngIf="itemDetailsModalTotalStock>=0" type="submit" class="btn btn-success" (click)="openAddEditCentered(contentAddEdit)">+ Add</button>
+     <button *ngIf="itemDetailsModalTotalStock<0 && processingAddDatabase==false" type="submit" class="btn btn-success" (click)="addingItemToDB()">+ Add to DB</button>
+     <button *ngIf="processingAddDatabase==false" type="submit" class="btn btn-danger" [disabled]="itemDetailsModalTotalStock<=0">- Deduct</button>
+     <button *ngIf="processingAddDatabase" type="submit" class="btn btn-primary" >Save</button>
     </div>
 
 
@@ -190,6 +210,24 @@
   <form [formGroup]="searchUPCForm" (ngSubmit)="getItemDataUPC()">
   <div class="modal-body">
     <input class="form-control" formControlName="upcText"  type="text" placeholder="" autofocus>
+  </div>
+</form>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+  </div>
+</ng-template>
+
+
+<ng-template #contentAddEdit let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">Add Item</h4>
+    
+  </div>
+  <form [formGroup]="searchUPCForm" >
+  <div class="modal-body">
+    <input class="form-control" formControlName="upcText"  type="text" placeholder="Quantity" autofocus>
+    <input class="form-control" formControlName="addEditExpirationDate"  type="text" placeholder="MM/DD/YYY" >
+    
   </div>
 </form>
   <div class="modal-footer">

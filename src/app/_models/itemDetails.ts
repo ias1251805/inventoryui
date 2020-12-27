@@ -5,7 +5,7 @@ export class ItemDetails {
     id: string;
     quantity: string;
     expirationDate: string;
-    itdt_fid: string;
+    item_id: string;
     user: Account;
     
 }

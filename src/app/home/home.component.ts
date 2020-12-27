@@ -1,4 +1,4 @@
-﻿import { Component, ElementRef, PipeTransform, TemplateRef, ViewChild } from '@angular/core';
+﻿import { Component, ElementRef, Pipe, PipeTransform, TemplateRef, ViewChild } from '@angular/core';
 
 import { AccountService } from '@app/_services';
 import { FormGroup, FormBuilder } from '@angular/forms';
@@ -6,8 +6,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { first } from 'rxjs/operators';
 import { Item, ItemDetails } from '@app/_models';
 import { Observable } from 'rxjs';
-
-
+import { DatePipe } from '@angular/common';
 
 
 @Component({ templateUrl: 'home.component.html',
@@ -34,6 +33,9 @@ export class HomeComponent {
     public itemDetailsModalTotalStock: number;
     public itemDetailsModalItemId: number;
     public itemDetails: ItemDetails[];
+    public itemDetailsModalAddingStatus: boolean;
+    public expirationDates: string[] = [];
+    public processingAddDatabase: boolean;
 
     value: string;
 
@@ -42,7 +44,7 @@ export class HomeComponent {
     items$: Observable<Item[]>;
     formFilter: FormGroup;
 
-    constructor(private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal) { }
+    constructor(private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal,public datepipe: DatePipe) { }
 
     // convenience getter for easy access to form fields
     get f() { return this.formSearch.controls; }
@@ -70,14 +72,21 @@ export class HomeComponent {
                 upc: [''],
                 shortDescription: [''],
                 brandName: [''],
-                expirationDateSelect: ['']
+                expirationDateSelect: [''],
+                quantityAdd: [''],
+                sellingPrice: [''],
+                category: ['']
                });
     }
 
-    openVerticallyCentered(content) {
-        
+   
+
+    openVerticallyCentered(content) {      
        
-       
+        this.modalService.open(content, { centered: true });
+      }
+
+      openAddEditCentered(content){
         this.modalService.open(content, { centered: true });
       }
 
@@ -108,14 +117,26 @@ export class HomeComponent {
     openModal(targetModal, item) {
 
         
-
+        this.itemDetailsModalAddingStatus = true;
         this.imageSrcModal = item.largeImage;
         this.itemDescription = item.shortDescription;
         this.itemDetailsModalTotalStock = -1;
-
+        this.expirationDates = [];
+        this.processingAddDatabase = false;
+        
         if(item.itemDetails){
             this.itemDetailsModalTotalStock = this.getTotalQuantity(item.itemDetails);
             this.itemDetails = item.itemDetails;
+           
+            for (let itemDetails of this.itemDetails) {                
+                let counter: number = 0;
+                counter = counter +1;
+                if (itemDetails.expirationDate != null) {   
+                    this.expirationDates.push('ID: ' + itemDetails.item_id + '-' + counter + ' | Exp Date: ' + this.datepipe.transform(itemDetails.expirationDate, 'MM-dd-yyyy') + ' | ' +  'Stock: ' + itemDetails.quantity);
+                }
+            }      
+
+           
            
         }
         
@@ -135,15 +156,31 @@ export class HomeComponent {
             salePrice: item.salePrice,
             upc: item.upc,
             shortDescription: item.shortDescription,
-            brandName: item.brandName,
+            brandName: item.brandName
             
 
            });
+
+           if(item.itemDetails){
+            this.editItemForm.patchValue({
+                sellingPrice: item.sellingPrice,
+            category: item.category.name?item.category.name:''
+                
+    
+               });
+            
+           }
+           
+         
+
+
            this.formItemDetails.name.disable();
            this.formItemDetails.salePrice.disable();
            this.formItemDetails.upc.disable();
            this.formItemDetails.brandName.disable();
            this.formItemDetails.shortDescription.disable();
+           this.formItemDetails.sellingPrice.disable();
+           this.formItemDetails.category.disable();
        
         }
 
@@ -151,4 +188,14 @@ export class HomeComponent {
             this.modalService.dismissAll();
             console.log("res:", this.editItemForm.getRawValue());
            }
+
+
+        addingItemToDB(){
+            this.processingAddDatabase = true;
+            this.formItemDetails.sellingPrice.setValue("");
+            
+            this.formItemDetails.sellingPrice.enable();
+            
+        }
+
 }
