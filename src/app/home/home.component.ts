@@ -2,7 +2,7 @@
 
 import { AccountService } from '@app/_services';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { first } from 'rxjs/operators';
 import { Item, ItemCategory, ItemDetails } from '@app/_models';
 import { Observable } from 'rxjs';
@@ -16,6 +16,8 @@ export class HomeComponent {
     formSearch: FormGroup;
     searchUPCForm: FormGroup;
     addItemDetailsForm: FormGroup;
+    private modalRef1: NgbModalRef;
+    private modalRef2: NgbModalRef;
 
     loading = false;
     
@@ -50,7 +52,7 @@ export class HomeComponent {
     items$: Observable<Item[]>;
     formFilter: FormGroup;
 
-    constructor(private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal,public datepipe: DatePipe, private alertService: AlertService,private router: Router, private route: ActivatedRoute) { }
+    constructor(private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal, private activeModal: NgbActiveModal, public datepipe: DatePipe, private alertService: AlertService,private router: Router, private route: ActivatedRoute) { }
 
     // convenience getter for easy access to form fields
     get f() { return this.formSearch.controls; }
@@ -99,7 +101,7 @@ export class HomeComponent {
         
         this.processingAddItemDetailsDatabase = false;  
         this.formUPCSearch.upcText.setValue("");
-        this.modalService.open(content, { centered: true });
+        this.modalRef2 =this.modalService.open(content, { centered: true });
       }
 
       openAddEditCentered(content){
@@ -109,7 +111,7 @@ export class HomeComponent {
         this.formAddItemDetails.quantityAdd.setValue("");
         this.formAddItemDetails.addEditExpirationDate.setValue("");
 
-        this.modalService.open(content, { centered: true });
+        this.modalRef1 =  this.modalService.open(content, { centered: true });
       }
 
 
@@ -139,7 +141,7 @@ export class HomeComponent {
     openModal(targetModal, item) {
 
         
-        this.itemDetailsModalAddingStatus = true;
+        //this.itemDetailsModalAddingStatus = true;
         this.imageSrcModal = item.largeImage;
         this.itemDescription = item.shortDescription;
         this.itemDetailsModalTotalStock = -1;
@@ -164,13 +166,16 @@ export class HomeComponent {
         
         this.itemDetailsModalItemId = item.itemId
 
-        this.modalService.open(targetModal, {
+        this.modalRef2 = this.modalService.open(targetModal, {
          centered: true,
          backdrop: 'static',
          size: 'lg'
         });
 
-       
+        this.processingAddItemDetailsDatabase = false;
+        //this.alertService.clear();
+        this.alertService.success('Item added successfully', { keepAfterRouteChange: true });
+
         
         this.editItemForm.patchValue({
             name: item.name,
@@ -203,7 +208,7 @@ export class HomeComponent {
            this.formItemDetails.shortDescription.disable();
            this.formItemDetails.sellingPrice.disable();
            this.formItemDetails.category.disable();
-       
+           
         }
 
         onSubmit() {
@@ -223,19 +228,19 @@ export class HomeComponent {
         saveItemData(){
 
             if((this.formItemDetails.sellingPrice.value == "") && (this.formItemDetails.categorySelect.value == "")){
-                this.alertService.clear();
+                //this.alertService.clear();
                 this.alertService.error("Provide selling price and select a category for this item");
                 return;
             }
 
             if(this.formItemDetails.categorySelect.value == ""){
-                this.alertService.clear();
+               // this.alertService.clear();
                 this.alertService.error("Select a category for this item");
                 return;
             }
 
             if(this.formItemDetails.sellingPrice.value == ""){
-                this.alertService.clear();
+               // this.alertService.clear();
                 this.alertService.error("Provide selling price for this item");
                 return;
             }
@@ -256,7 +261,8 @@ export class HomeComponent {
                 next: (response: any) => {
                     console.log(response.itemId);
                     this.itemDetailsModalItemId = response.itemId;
-                    this.alertService.clear();
+                    this.currentItem.itemId = response.itemId;
+                    //this.alertService.clear();
                     this.alertService.success('Item added successfully to Database', { keepAfterRouteChange: true });
                     this.formItemDetails.category.setValue(this.categoryList[Number(this.formItemDetails.categorySelect.value) - 1])
                     this.formItemDetails.sellingPrice.disable();
@@ -287,10 +293,14 @@ export class HomeComponent {
          }
 
         addItemDetailsDB(){
-            
+            if((this.formAddItemDetails.quantityAdd.value == "") ){
+                //this.alertService.clear();
+                this.alertService.error("Provide quantity ");
+                return;
+            }
 
             if((this.formAddItemDetails.quantityAdd.value == "") && (this.formAddItemDetails.addEditExpirationDate.value == "")){
-                this.alertService.clear();
+               // this.alertService.clear();
                 this.alertService.error("Provide quantity or expiration date");
                 return;
             }
@@ -298,11 +308,11 @@ export class HomeComponent {
 
 
            
-            console.log(this.datepipe.transform(this.formAddItemDetails.addEditExpirationDate.value,"yyyy-MM-dd")); //output : 2018-02-13
+            console.log(this.datepipe.transform(this.formAddItemDetails.addEditExpirationDate.value,"yyyy-MM-dd'T'HH:mm:ss.SSS")); //output : 2018-02-13
 
 
 
-            let itemDetails = new ItemDetails(this.formAddItemDetails.quantityAdd.value,this.datepipe.transform(this.formAddItemDetails.addEditExpirationDate.value,"yyyy-MM-dd"),this.currentItem.itemId,"2" );
+            let itemDetails = new ItemDetails(this.formAddItemDetails.quantityAdd.value,this.datepipe.transform(this.formAddItemDetails.addEditExpirationDate.value,"yyyy-MM-dd'T'HH:mm:ss.SSS"),this.currentItem.itemId,"2" );
 
             this.accountService.addItemDetailsDB(itemDetails)
             .pipe(first())
@@ -310,23 +320,58 @@ export class HomeComponent {
                 next: (response: any) => {
                     console.log(response);
                     
-                    this.alertService.clear();
-                    this.alertService.success('Item added successfully', { keepAfterRouteChange: true });
-                    const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-                    this.router.navigateByUrl(returnUrl);
-                    this.processingAddItemDetailsDatabase = false;
-                    this.ngOnInit()
-                    this.openModal(this.detailgrid, this.itemSearch);
+                   
+                    //const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+                    //this.router.navigateByUrl(returnUrl);
+                    
 
+                   
+                    this.wait(3000)
+                    //this.modalService.dismissAll();
+                    this.ngOnInit()
+                    this.accountService.getItem(this.currentItem.upc)
+                    .pipe(first())
+                    .subscribe(resp => {
+            
+                    this.itemSearch = resp
+                    this.currentItem = resp
+                    this.processingAddItemDetailsDatabase = false;
+                    
+                    
+                    
+                    
+
+                    
+                    this.modalRef1.close();
+                    
+
+                    this.modalRef2.close();
+                     this.openModal(this.detailgrid, this.itemSearch);
+                     this.formUPCSearch.upcText.setValue("");
+                     this.processingAddItemDetailsDatabase = false;
+                     //this.alertService.clear();
+                     
+                     
+                     //this.alertService.success('Item added successfully', { keepAfterRouteChange: true });
+                     
+                     
+                    });
+                    
+                   
+                    //this.activeModal.dismiss();
+                    //this.activeModal.close();
                 },
                 error: error => {
                     this.alertService.error("An error ocurred, verify date format is correct mm/dd/yyyy");
                     this.loading = false;
                 }
+
+                
             }  
             
             );
-
+            this.processingAddItemDetailsDatabase = false;
+            this.alertService.success('Item added successfully', { keepAfterRouteChange: true });
 
             
         }

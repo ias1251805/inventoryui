@@ -81,7 +81,7 @@
  <ng-template #editItemModal let-modal>
 
 
-  <alert *ngIf="!processingAddItemDetailsDatabase"></alert>
+  <alert *ngIf="processingAddItemDetailsDatabase==false"></alert>
 
   <div class="modal-header">
    <h5 *ngIf="itemDetailsModalTotalStock!=-1" class="modal-title" id="editItemLabel">Item ID: {{itemDetailsModalItemId}}</h5>
@@ -235,7 +235,7 @@
 
 
 <ng-template #contentAddEdit let-modal>
-  <alert></alert>
+  <alert ></alert>
   <div class="modal-header">
     <h4 class="modal-title">Add Item</h4>
     

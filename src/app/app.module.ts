@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 // used to create fake backend
 import { fakeBackendProvider } from './_helpers';
 
@@ -24,7 +24,8 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations'
         HttpClientModule,
         AppRoutingModule,
         NgbModule,
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        
     ],
     declarations: [
         AppComponent,
@@ -32,6 +33,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations'
         HomeComponent
     ],
     providers: [
+        NgbActiveModal,
         { provide: APP_INITIALIZER, useFactory: appInitializer, multi: true, deps: [AccountService] },
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
