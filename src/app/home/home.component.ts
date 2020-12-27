@@ -52,7 +52,7 @@ export class HomeComponent {
     items$: Observable<Item[]>;
     formFilter: FormGroup;
 
-    constructor(private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal, private activeModal: NgbActiveModal, public datepipe: DatePipe, private alertService: AlertService,private router: Router, private route: ActivatedRoute) { }
+    constructor(private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal, private activeModal: NgbActiveModal, public datepipe: DatePipe, private alertService: AlertService,private router: Router, private route: ActivatedRoute,private elementRef: ElementRef) { }
 
     // convenience getter for easy access to form fields
     get f() { return this.formSearch.controls; }
@@ -172,9 +172,7 @@ export class HomeComponent {
          size: 'lg'
         });
 
-        this.processingAddItemDetailsDatabase = false;
-        //this.alertService.clear();
-        this.alertService.success('Item added successfully', { keepAfterRouteChange: true });
+       
 
         
         this.editItemForm.patchValue({
@@ -228,24 +226,24 @@ export class HomeComponent {
         saveItemData(){
 
             if((this.formItemDetails.sellingPrice.value == "") && (this.formItemDetails.categorySelect.value == "")){
-                //this.alertService.clear();
+                this.alertService.clear();
                 this.alertService.error("Provide selling price and select a category for this item");
                 return;
             }
 
             if(this.formItemDetails.categorySelect.value == ""){
-               // this.alertService.clear();
+                this.alertService.clear();
                 this.alertService.error("Select a category for this item");
                 return;
             }
 
             if(this.formItemDetails.sellingPrice.value == ""){
-               // this.alertService.clear();
+                this.alertService.clear();
                 this.alertService.error("Provide selling price for this item");
                 return;
             }
 
-            
+            console.log('Continued')
     
             let categoryToAddItey = new ItemCategory(this.formItemDetails.categorySelect.value ,'');
             this.currentItem.sellingPrice=this.formItemDetails.sellingPrice.value;
@@ -262,7 +260,7 @@ export class HomeComponent {
                     console.log(response.itemId);
                     this.itemDetailsModalItemId = response.itemId;
                     this.currentItem.itemId = response.itemId;
-                    //this.alertService.clear();
+                    this.alertService.clear();
                     this.alertService.success('Item added successfully to Database', { keepAfterRouteChange: true });
                     this.formItemDetails.category.setValue(this.categoryList[Number(this.formItemDetails.categorySelect.value) - 1])
                     this.formItemDetails.sellingPrice.disable();
@@ -293,14 +291,17 @@ export class HomeComponent {
          }
 
         addItemDetailsDB(){
-            if((this.formAddItemDetails.quantityAdd.value == "") ){
-                //this.alertService.clear();
+            this.processingAddItemDetailsDatabase = true;
+            console.log('Getting item quanityty value: ' + Number(this.formAddItemDetails.quantityAdd.value))
+
+            if((this.formAddItemDetails.quantityAdd.value == "" || Number(this.formAddItemDetails.quantityAdd.value) <=0 ) ){
+                this.alertService.clear();
                 this.alertService.error("Provide quantity ");
                 return;
             }
 
             if((this.formAddItemDetails.quantityAdd.value == "") && (this.formAddItemDetails.addEditExpirationDate.value == "")){
-               // this.alertService.clear();
+                this.alertService.clear();
                 this.alertService.error("Provide quantity or expiration date");
                 return;
             }
@@ -375,6 +376,15 @@ export class HomeComponent {
 
             
         }
+
+        moveEnter(event) {
+            console.log('entering')
+           // if (event.keyCode === 13) {
+            event.srcElement.nextElementSibling.focus();
+                //this.elementRef.nativeElement.focus();
+            //}
+        }
+             
 
 
         

@@ -81,7 +81,7 @@
  <ng-template #editItemModal let-modal>
 
 
-  <alert *ngIf="processingAddItemDetailsDatabase==false"></alert>
+  <alert *ngIf="!processingAddItemDetailsDatabase"></alert>
 
   <div class="modal-header">
    <h5 *ngIf="itemDetailsModalTotalStock!=-1" class="modal-title" id="editItemLabel">Item ID: {{itemDetailsModalItemId}}</h5>
@@ -242,11 +242,11 @@
   </div>
   <form [formGroup]="addItemDetailsForm" >
   <div class="modal-body">
-    <input class="form-control" formControlName="quantityAdd"  type="text" placeholder="Quantity" autofocus>
+    <input (keyup.enter)="moveEnter($event)" class="form-control" formControlName="quantityAdd"  type="number" (click)="$event.target.select()" placeholder="Quantity" autofocus>
 
 
 
-    <input class="form-control" formControlName="addEditExpirationDate"  type="text" placeholder="mm/dd/yyyy" style="margin-top: 10px;" >
+    <input (keyup.enter)="addItemDetailsDB()" type="date" datetime="MM-dd" class="form-control" formControlName="addEditExpirationDate"  placeholder="mm/dd/yyyy" style="margin-top: 10px;" >
     
   </div>
 </form>
