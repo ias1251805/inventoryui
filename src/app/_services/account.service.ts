@@ -36,9 +36,15 @@ export class AccountService {
         return this.http.post<any>(baseUrl + "/authenticate", { email, password }, { withCredentials: false })
             .pipe(map(account => {
                 this.accountSubject.next(account);
-                this.startRefreshTokenTimer();
+                //this.startRefreshTokenTimer();
                 return this.account;
             }));
+    }
+
+
+
+    saveItemDB(item: Item) {
+        return this.http.post<any>(`${environment.apiUrl}/products/addItem`, item);
     }
 
     logout() {

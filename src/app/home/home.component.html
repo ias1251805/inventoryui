@@ -134,7 +134,7 @@
         <span class="input-group-text" id="categorySelect">Select Category</span>
       </div>
       <select class="form-control shadow-none" formControlName="categorySelect" id="categorySelect" aria-label="Small" aria-describedby="inputGroup-sizing-sm" >
-        <option *ngFor="let category of categoryList; let i = index" [value]="i">{{category}}</option>
+        <option *ngFor="let category of categoryList; let i = index" [value]="i + 1">{{category}}</option>
       </select>
 
     </div>

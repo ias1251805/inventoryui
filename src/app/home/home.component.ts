@@ -27,7 +27,7 @@ export class HomeComponent {
     itemDescription: ''
     itemList: any[];
     public itemSearch: Item;
-    public categoryList: string[] = ['Baby','Beauty','Food','Health','Household','Baby','Personal Care'];
+    public categoryList: string[] = ['Food','Beauty','Household','Health','Baby','Personal Care'];
 
 
 
@@ -221,20 +221,39 @@ export class HomeComponent {
                 return;
             }
 
-  
+            
     
-            let categoryToAddItey = new ItemCategory(this.formItemDetails.categorySelect.value,'');
+            let categoryToAddItey = new ItemCategory(this.formItemDetails.categorySelect.value ,'');
             this.currentItem.sellingPrice=this.formItemDetails.sellingPrice.value;
             this.currentItem.category = categoryToAddItey ;
 
 
             //Resetting values after success call to saving Item
-            this.alertService.clear();
-            this.alertService.success("Item added successfully to Database");
-            this.formItemDetails.category.setValue(this.categoryList[this.formItemDetails.categorySelect.value])
-            this.formItemDetails.sellingPrice.disable();
-            this.itemDetailsModalTotalStock = 0;
-            this.processingAddDatabase = false;
+
+
+            this.accountService.saveItemDB(this.currentItem)
+            .pipe(first())
+            .subscribe({
+                next: (response: any) => {
+                    console.log(response.itemId);
+                    this.itemDetailsModalItemId = response.itemId;
+                    this.alertService.clear();
+                    this.alertService.success('Item added successfully to Database', { keepAfterRouteChange: true });
+                    this.formItemDetails.category.setValue(this.categoryList[Number(this.formItemDetails.categorySelect.value) - 1])
+                    this.formItemDetails.sellingPrice.disable();
+                    this.itemDetailsModalTotalStock = 0;
+                    this.processingAddDatabase = false;
+
+                },
+                error: error => {
+                    this.alertService.error("An error ocurred");
+                    this.loading = false;
+                }
+            }  
+            
+            );
+
+            
             
             
         }
