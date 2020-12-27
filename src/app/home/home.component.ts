@@ -8,12 +8,15 @@ import { Item, ItemCategory, ItemDetails } from '@app/_models';
 import { Observable } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { AlertService } from '@app/_services';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({ templateUrl: 'home.component.html',
 styleUrls: ['./home.component.css'] })
 export class HomeComponent {
     formSearch: FormGroup;
     searchUPCForm: FormGroup;
+    addItemDetailsForm: FormGroup;
+
     loading = false;
     
     @ViewChild('editItemModal', {static: false})
@@ -38,6 +41,7 @@ export class HomeComponent {
     public expirationDates: string[] = [];
     public processingAddDatabase: boolean;
     public currentItem: Item;
+    public processingAddItemDetailsDatabase: boolean;
 
     value: string;
 
@@ -46,12 +50,13 @@ export class HomeComponent {
     items$: Observable<Item[]>;
     formFilter: FormGroup;
 
-    constructor(private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal,public datepipe: DatePipe, private alertService: AlertService) { }
+    constructor(private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal,public datepipe: DatePipe, private alertService: AlertService,private router: Router, private route: ActivatedRoute) { }
 
     // convenience getter for easy access to form fields
     get f() { return this.formSearch.controls; }
     get formUPCSearch() { return this.searchUPCForm.controls; }
     get formItemDetails() { return this.editItemForm.controls; }
+    get formAddItemDetails(){return this.addItemDetailsForm.controls;}
 
     ngOnInit() {
         
@@ -62,6 +67,12 @@ export class HomeComponent {
         this.searchUPCForm = this.fb.group({
             upcText: ['']
         });
+
+
+        this.addItemDetailsForm = this.fb.group({
+            quantityAdd: [''],
+            addEditExpirationDate: ['']
+        })
         
         this.accountService.getAllItems()
             .pipe(first())
@@ -84,12 +95,20 @@ export class HomeComponent {
 
    
 
-    openVerticallyCentered(content) {      
+    openVerticallyCentered(content) {    
+        
+        this.processingAddItemDetailsDatabase = false;  
         this.formUPCSearch.upcText.setValue("");
         this.modalService.open(content, { centered: true });
       }
 
       openAddEditCentered(content){
+        this.processingAddItemDetailsDatabase = true;
+
+
+        this.formAddItemDetails.quantityAdd.setValue("");
+        this.formAddItemDetails.addEditExpirationDate.setValue("");
+
         this.modalService.open(content, { centered: true });
       }
 
@@ -257,5 +276,62 @@ export class HomeComponent {
             
             
         }
+
+
+        wait(ms){
+            var start = new Date().getTime();
+            var end = start;
+            while(end < start + ms) {
+              end = new Date().getTime();
+           }
+         }
+
+        addItemDetailsDB(){
+            
+
+            if((this.formAddItemDetails.quantityAdd.value == "") && (this.formAddItemDetails.addEditExpirationDate.value == "")){
+                this.alertService.clear();
+                this.alertService.error("Provide quantity or expiration date");
+                return;
+            }
+            
+
+
+           
+            console.log(this.datepipe.transform(this.formAddItemDetails.addEditExpirationDate.value,"yyyy-MM-dd")); //output : 2018-02-13
+
+
+
+            let itemDetails = new ItemDetails(this.formAddItemDetails.quantityAdd.value,this.datepipe.transform(this.formAddItemDetails.addEditExpirationDate.value,"yyyy-MM-dd"),this.currentItem.itemId,"2" );
+
+            this.accountService.addItemDetailsDB(itemDetails)
+            .pipe(first())
+            .subscribe({
+                next: (response: any) => {
+                    console.log(response);
+                    
+                    this.alertService.clear();
+                    this.alertService.success('Item added successfully', { keepAfterRouteChange: true });
+                    const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+                    this.router.navigateByUrl(returnUrl);
+                    this.processingAddItemDetailsDatabase = false;
+                    this.ngOnInit()
+                    this.openModal(this.detailgrid, this.itemSearch);
+
+                },
+                error: error => {
+                    this.alertService.error("An error ocurred, verify date format is correct mm/dd/yyyy");
+                    this.loading = false;
+                }
+            }  
+            
+            );
+
+
+            
+        }
+
+
+        
 
 }

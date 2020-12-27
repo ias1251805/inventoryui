@@ -13,7 +13,8 @@ import { AccountService } from './_services';
 import { AppComponent } from './app.component';
 import { AlertComponent } from './_components';
 import { HomeComponent } from './home';
-import { DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';;
+import { NoopAnimationsModule } from '@angular/platform-browser/animations'
 
 
 @NgModule({
@@ -23,6 +24,7 @@ import { DatePipe } from '@angular/common';
         HttpClientModule,
         AppRoutingModule,
         NgbModule,
+        NoopAnimationsModule
     ],
     declarations: [
         AppComponent,

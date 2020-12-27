@@ -81,7 +81,7 @@
  <ng-template #editItemModal let-modal>
 
 
-  <alert></alert>
+  <alert *ngIf="!processingAddItemDetailsDatabase"></alert>
 
   <div class="modal-header">
    <h5 *ngIf="itemDetailsModalTotalStock!=-1" class="modal-title" id="editItemLabel">Item ID: {{itemDetailsModalItemId}}</h5>
@@ -235,18 +235,25 @@
 
 
 <ng-template #contentAddEdit let-modal>
+  <alert></alert>
   <div class="modal-header">
     <h4 class="modal-title">Add Item</h4>
     
   </div>
-  <form [formGroup]="searchUPCForm" >
+  <form [formGroup]="addItemDetailsForm" >
   <div class="modal-body">
-    <input class="form-control" formControlName="upcText"  type="text" placeholder="Quantity" autofocus>
-    <input class="form-control" formControlName="addEditExpirationDate"  type="text" placeholder="MM/DD/YYY" >
+    <input class="form-control" formControlName="quantityAdd"  type="text" placeholder="Quantity" autofocus>
+
+
+
+    <input class="form-control" formControlName="addEditExpirationDate"  type="text" placeholder="mm/dd/yyyy" style="margin-top: 10px;" >
     
   </div>
 </form>
   <div class="modal-footer">
+    <button  type="submit" class="btn btn-primary" (click)="addItemDetailsDB()" >
+      <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span> 
+      Save</button>
     <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
   </div>
 </ng-template>

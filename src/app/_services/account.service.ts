@@ -5,7 +5,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map, finalize } from 'rxjs/operators';
 
 import { environment } from '@environments/environment';
-import { Account } from '@app/_models';
+import { Account, ItemDetails } from '@app/_models';
 import { Item } from '@app/_models';
 
 const baseUrl = `${environment.apiUrl}` + '/account';
@@ -45,6 +45,10 @@ export class AccountService {
 
     saveItemDB(item: Item) {
         return this.http.post<any>(`${environment.apiUrl}/products/addItem`, item);
+    }
+
+    addItemDetailsDB(itemDetails: ItemDetails) {
+        return this.http.post<any>(`${environment.apiUrl}/products/addItemDetails`, itemDetails);
     }
 
     logout() {
