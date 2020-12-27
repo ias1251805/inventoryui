@@ -4,18 +4,17 @@ import { AccountService } from '@app/_services';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { first } from 'rxjs/operators';
-import { Item, ItemDetails } from '@app/_models';
+import { Item, ItemCategory, ItemDetails } from '@app/_models';
 import { Observable } from 'rxjs';
 import { DatePipe } from '@angular/common';
-
+import { AlertService } from '@app/_services';
 
 @Component({ templateUrl: 'home.component.html',
 styleUrls: ['./home.component.css'] })
 export class HomeComponent {
     formSearch: FormGroup;
     searchUPCForm: FormGroup;
-
-
+    loading = false;
     
     @ViewChild('editItemModal', {static: false})
 
@@ -28,6 +27,8 @@ export class HomeComponent {
     itemDescription: ''
     itemList: any[];
     public itemSearch: Item;
+    public categoryList: string[] = ['Baby','Beauty','Food','Health','Household','Baby','Personal Care'];
+
 
 
     public itemDetailsModalTotalStock: number;
@@ -36,6 +37,7 @@ export class HomeComponent {
     public itemDetailsModalAddingStatus: boolean;
     public expirationDates: string[] = [];
     public processingAddDatabase: boolean;
+    public currentItem: Item;
 
     value: string;
 
@@ -44,7 +46,7 @@ export class HomeComponent {
     items$: Observable<Item[]>;
     formFilter: FormGroup;
 
-    constructor(private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal,public datepipe: DatePipe) { }
+    constructor(private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal,public datepipe: DatePipe, private alertService: AlertService) { }
 
     // convenience getter for easy access to form fields
     get f() { return this.formSearch.controls; }
@@ -75,14 +77,15 @@ export class HomeComponent {
                 expirationDateSelect: [''],
                 quantityAdd: [''],
                 sellingPrice: [''],
-                category: ['']
+                category: [''],
+                categorySelect: ['']
                });
     }
 
    
 
     openVerticallyCentered(content) {      
-       
+        this.formUPCSearch.upcText.setValue("");
         this.modalService.open(content, { centered: true });
       }
 
@@ -123,7 +126,7 @@ export class HomeComponent {
         this.itemDetailsModalTotalStock = -1;
         this.expirationDates = [];
         this.processingAddDatabase = false;
-        
+        this.currentItem = item;
         if(item.itemDetails){
             this.itemDetailsModalTotalStock = this.getTotalQuantity(item.itemDetails);
             this.itemDetails = item.itemDetails;
@@ -193,8 +196,46 @@ export class HomeComponent {
         addingItemToDB(){
             this.processingAddDatabase = true;
             this.formItemDetails.sellingPrice.setValue("");
-            
             this.formItemDetails.sellingPrice.enable();
+            
+        }
+
+
+        saveItemData(){
+
+            if((this.formItemDetails.sellingPrice.value == "") && (this.formItemDetails.categorySelect.value == "")){
+                this.alertService.clear();
+                this.alertService.error("Provide selling price and select a category for this item");
+                return;
+            }
+
+            if(this.formItemDetails.categorySelect.value == ""){
+                this.alertService.clear();
+                this.alertService.error("Select a category for this item");
+                return;
+            }
+
+            if(this.formItemDetails.sellingPrice.value == ""){
+                this.alertService.clear();
+                this.alertService.error("Provide selling price for this item");
+                return;
+            }
+
+  
+    
+            let categoryToAddItey = new ItemCategory(this.formItemDetails.categorySelect.value,'');
+            this.currentItem.sellingPrice=this.formItemDetails.sellingPrice.value;
+            this.currentItem.category = categoryToAddItey ;
+
+
+            //Resetting values after success call to saving Item
+            this.alertService.clear();
+            this.alertService.success("Item added successfully to Database");
+            this.formItemDetails.category.setValue(this.categoryList[this.formItemDetails.categorySelect.value])
+            this.formItemDetails.sellingPrice.disable();
+            this.itemDetailsModalTotalStock = 0;
+            this.processingAddDatabase = false;
+            
             
         }
 

@@ -16,4 +16,5 @@ export class Item {
     quantity: string;
     category: ItemCategory; 
     sellingPrice: string;
+ 
 }

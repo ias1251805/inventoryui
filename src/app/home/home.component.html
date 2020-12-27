@@ -1,7 +1,7 @@
 ﻿
  <div class="container max-height: 100%">
 
- 
+
 
 <div class="card shadow p-3 mb-5 bg-white rounded" style="margin-top: 40px; margin-bottom:80px;;">
   
@@ -12,7 +12,7 @@
   </div>
   
   
-  
+
 
     <div class="input-group col-md-4 no-gutters" style="margin-left: auto;margin-top: 25px;padding-right: 0px;padding-left: 0px;">
 
@@ -32,7 +32,7 @@
 
 
   
-    
+
   
  
   <div class="row justify-content-center">
@@ -79,6 +79,10 @@
 
 
  <ng-template #editItemModal let-modal>
+
+
+  <alert></alert>
+
   <div class="modal-header">
    <h5 *ngIf="itemDetailsModalTotalStock!=-1" class="modal-title" id="editItemLabel">Item ID: {{itemDetailsModalItemId}}</h5>
    
@@ -116,13 +120,23 @@
 
 
     
-
+    
     
     <div *ngIf="itemDetailsModalTotalStock>=0 && !processingAddDatabase" class="input-group input-group-sm mb-3">
       <div class="input-group-prepend">
         <span class="input-group-text" id="category">Category</span>
       </div>
       <input type="text" class="form-control shadow-none" formControlName="category" aria-label="Small" aria-describedby="inputGroup-sizing-sm" >
+    </div>
+
+    <div  *ngIf=" processingAddDatabase" class="input-group input-group-sm mb-3" >
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="categorySelect">Select Category</span>
+      </div>
+      <select class="form-control shadow-none" formControlName="categorySelect" id="categorySelect" aria-label="Small" aria-describedby="inputGroup-sizing-sm" >
+        <option *ngFor="let category of categoryList; let i = index" [value]="i">{{category}}</option>
+      </select>
+
     </div>
 
 
@@ -188,9 +202,11 @@
     <div class="modal-footer" style="padding-left: 0;padding-right: 0;">
      <button type="button" class="btn btn-secondary" style="margin-right: auto;" (click)="modal.dismiss()" autofocus>Close</button>
      <button *ngIf="itemDetailsModalTotalStock>=0" type="submit" class="btn btn-success" (click)="openAddEditCentered(contentAddEdit)">+ Add</button>
-     <button *ngIf="itemDetailsModalTotalStock<0 && processingAddDatabase==false" type="submit" class="btn btn-success" (click)="addingItemToDB()">+ Add to DB</button>
+     <button *ngIf="itemDetailsModalTotalStock<0 && processingAddDatabase==false" type="submit" class="btn btn-success" (click)="addingItemToDB(item)">+ Add to DB</button>
      <button *ngIf="processingAddDatabase==false" type="submit" class="btn btn-danger" [disabled]="itemDetailsModalTotalStock<=0">- Deduct</button>
-     <button *ngIf="processingAddDatabase" type="submit" class="btn btn-primary" >Save</button>
+     <button *ngIf="processingAddDatabase" type="submit" class="btn btn-primary" (click)="saveItemData()" >
+      <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span> 
+      Save</button>
     </div>
 
 
@@ -243,3 +259,5 @@
    
     </div>
   </div>
+
+  
