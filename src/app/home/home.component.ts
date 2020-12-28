@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { AlertService } from '@app/_services';
 import { ActivatedRoute, Router } from '@angular/router';
+import { stringify } from '@angular/compiler/src/util';
 
 @Component({ templateUrl: 'home.component.html',
 styleUrls: ['./home.component.css'] })
@@ -18,7 +19,9 @@ export class HomeComponent {
     addItemDetailsForm: FormGroup;
     private modalRef1: NgbModalRef;
     private modalRef2: NgbModalRef;
-
+    public expirationSelect: any = {
+        defaultLayout: ''
+     }
     loading = false;
     
     @ViewChild('editItemModal', {static: false})
@@ -125,16 +128,31 @@ export class HomeComponent {
       }
 
     getItemDataUPC(){
+
+
+        this.alertService.info("Searching Item with UPC: " + this.formUPCSearch.upcText.value  );
+        let errorResponse: string;
+
         this.accountService.getItem(this.formUPCSearch.upcText.value)
         .pipe(first())
-        .subscribe(resp => {
-
+        .subscribe({
+            next: (resp: any) => {
+                
+                
          this.itemSearch = resp
 
 
          this.openModal(this.detailgrid, this.itemSearch);
          this.formUPCSearch.upcText.setValue("");
-        });
+
+            },
+            error: error => {
+                this.alertService.error("UPC not found" );
+                this.loading = false;
+            }
+        }  
+        
+        );
         
     }
 
@@ -151,12 +169,13 @@ export class HomeComponent {
         if(item.itemDetails){
             this.itemDetailsModalTotalStock = this.getTotalQuantity(item.itemDetails);
             this.itemDetails = item.itemDetails;
-           
+            let counter: number = 0;
             for (let itemDetails of this.itemDetails) {                
-                let counter: number = 0;
-                counter = counter +1;
-                if (itemDetails.expirationDate != null) {   
-                    this.expirationDates.push('ID: ' + itemDetails.item_id + '-' + counter + ' | Exp Date: ' + this.datepipe.transform(itemDetails.expirationDate, 'MM-dd-yyyy') + ' | ' +  'Stock: ' + itemDetails.quantity);
+                
+                
+                if (itemDetails.expirationDate != null) {  
+                    counter = counter +1; 
+                    this.expirationDates.push('ID: ' + itemDetails.item_id + '-' + itemDetails.id + ' | Exp Date: ' + this.datepipe.transform(itemDetails.expirationDate, 'MM-dd-yyyy') + ' | ' +  'Stock: ' + itemDetails.quantity);
                 }
             }      
 
@@ -168,7 +187,7 @@ export class HomeComponent {
 
         this.modalRef2 = this.modalService.open(targetModal, {
          centered: true,
-         backdrop: 'static',
+        // backdrop: 'static',
          size: 'lg'
         });
 
@@ -216,6 +235,8 @@ export class HomeComponent {
 
 
         addingItemToDB(){
+            
+            this.alertService.warn('<b>Add new item to database by entering category and selling price</b>' , { keepAfterRouteChange: true });    
             this.processingAddDatabase = true;
             this.formItemDetails.sellingPrice.setValue("");
             this.formItemDetails.sellingPrice.enable();
@@ -224,7 +245,7 @@ export class HomeComponent {
 
 
         saveItemData(){
-
+            
             if((this.formItemDetails.sellingPrice.value == "") && (this.formItemDetails.categorySelect.value == "")){
                 this.alertService.clear();
                 this.alertService.error("Provide selling price and select a category for this item");
@@ -291,6 +312,10 @@ export class HomeComponent {
          }
 
         addItemDetailsDB(){
+
+           let itemDetailsAdded: string;
+
+            console.log('date value: ' + this.formAddItemDetails.addEditExpirationDate.value)
             this.processingAddItemDetailsDatabase = true;
             console.log('Getting item quanityty value: ' + Number(this.formAddItemDetails.quantityAdd.value))
 
@@ -313,21 +338,27 @@ export class HomeComponent {
 
 
 
-            let itemDetails = new ItemDetails(this.formAddItemDetails.quantityAdd.value,this.datepipe.transform(this.formAddItemDetails.addEditExpirationDate.value,"yyyy-MM-dd'T'HH:mm:ss.SSS"),this.currentItem.itemId,"2" );
+            let itemDetails = new ItemDetails(this.formAddItemDetails.quantityAdd.value,this.datepipe.transform(this.formAddItemDetails.addEditExpirationDate.value,"yyyy-MM-dd"),this.currentItem.itemId,"2" );
 
             this.accountService.addItemDetailsDB(itemDetails)
             .pipe(first())
             .subscribe({
                 next: (response: any) => {
                     console.log(response);
-                    
-                   
+                    itemDetailsAdded = response.itemDetailsId;
+                this.processingAddItemDetailsDatabase = false;
+                if(this.formAddItemDetails.addEditExpirationDate.value != ""){
+                    this.alertService.success('Item ID: <b>' + itemDetailsAdded + '</b> was added successfully' , { keepAfterRouteChange: true });    
+                }else{
+                    this.alertService.success('Item was added successfully' , { keepAfterRouteChange: true });    
+                }
+                
                     //const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
                     //this.router.navigateByUrl(returnUrl);
                     
 
                    
-                    this.wait(3000)
+                    
                     //this.modalService.dismissAll();
                     this.ngOnInit()
                     this.accountService.getItem(this.currentItem.upc)
@@ -339,9 +370,14 @@ export class HomeComponent {
                     this.processingAddItemDetailsDatabase = false;
                     
                     
-                    
-                    
+                    if(this.formAddItemDetails.addEditExpirationDate.value != ""){
+                        this.wait(3000)
 
+                    }else{
+                        this.wait(2000)
+                        
+                    }
+                    
                     
                     this.modalRef1.close();
                     
@@ -371,8 +407,8 @@ export class HomeComponent {
             }  
             
             );
-            this.processingAddItemDetailsDatabase = false;
-            this.alertService.success('Item added successfully', { keepAfterRouteChange: true });
+            //this.processingAddItemDetailsDatabase = false;
+            //this.alertService.success('Item added successfully. ID: ' + itemDetailsAdded, { keepAfterRouteChange: true });
 
             
         }

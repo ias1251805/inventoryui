@@ -46,7 +46,7 @@
        <th scope="col">Price</th>
        <th class="text-center" scope="col">Stock</th>
        <th class="text-center d-none d-sm-table-cell" scope="col">UPC</th>
-       <th class="text-center d-none d-sm-table-cell" scope="col">Link to Item</th>
+       <th class="text-center d-none d-sm-table-cell" scope="col">Link</th>
        <th class="text-center" scope="col">Image</th>      
       </tr>
      </thead>
@@ -192,7 +192,8 @@
       <div class="input-group-prepend">
         <span class="input-group-text" id="expirationDateSelect">Expiration Date</span>
       </div>
-      <select class="form-control shadow-none" formControlName="expirationDateSelect" id="expirationDateSelect" aria-label="Small" aria-describedby="inputGroup-sizing-sm" >
+      <select [(ngModel)]="expirationSelect.defaultLayout" class="form-control shadow-none" formControlName="expirationDateSelect" id="expirationDateSelect" aria-label="Small" aria-describedby="inputGroup-sizing-sm" >
+        <option  value=''>Grouped Items with expiration date</option>
         <option *ngFor="let itemDetailsCurrent of expirationDates; let i = index" [value]="expirationDates[i].expirationDate">{{expirationDates[i]}}</option>
       </select>
     </div>
@@ -219,6 +220,7 @@
 
 
  <ng-template #content let-modal>
+   <alert></alert>
   <div class="modal-header">
     <h4 class="modal-title">Search by UPC</h4>
     
