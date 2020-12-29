@@ -10,7 +10,7 @@ import { DatePipe } from '@angular/common';
 import { AlertService } from '@app/_services';
 import { ActivatedRoute, Router } from '@angular/router';
 import { stringify } from '@angular/compiler/src/util';
-
+import Quagga from 'quagga';
 @Component({ templateUrl: 'home.component.html',
 styleUrls: ['./home.component.css'] })
 export class HomeComponent {
@@ -63,6 +63,52 @@ export class HomeComponent {
     get formItemDetails() { return this.editItemForm.controls; }
     get formAddItemDetails(){return this.addItemDetailsForm.controls;}
 
+
+
+    // Create the QuaggaJS config object for the live stream
+	liveStreamConfig = {
+        inputStream: {
+            type : "LiveStream",
+            constraints: {
+               
+                facingMode: "environment" // or "user" for the front camera
+            }
+        },
+        locator: {
+            patchSize: "medium",
+            halfSample: true
+        },
+        numOfWorkers: (navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4),
+        decoder: {
+            "readers":[
+                {"format":"ean_reader","config":{}}
+            ]
+        },
+        locate: true
+    };
+
+    startQuagga(){
+        Quagga.init(
+			this.liveStreamConfig, 
+			function(err) {
+				Quagga.start();
+            },
+            Quagga.onDetected((result) => {
+                
+                if (result.codeResult.code){
+                    this.formUPCSearch.upcText.setValue(result.codeResult.code);
+                    Quagga.stop();	
+                    //setTimeout(function(){ $('#livestream_scanner').modal('hide'); }, 1000);			
+                }
+              
+            })
+        )};
+
+
+    stopQuagga(){
+        Quagga.stop();
+    }
+
     ngOnInit() {
         
         this.formSearch = this.fb.group({
@@ -105,7 +151,37 @@ export class HomeComponent {
         this.processingAddItemDetailsDatabase = false;  
         this.formUPCSearch.upcText.setValue("");
         this.modalRef2 =this.modalService.open(content, { centered: true });
+       
+        if(this.isMobile()){
+            this.startQuagga()
+            // this.modalRef2.componentInstance.name = 'World';
+             this.modalRef2.result.then(res=>{
+             },dismiss=>{
+                 if (Quagga){
+                     Quagga.stop();	
+                 }
+             })
+        }
+        
       }
+
+
+      isMobile(){
+        if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+            // true for mobile device
+            return true;
+          }else{
+            // false for not mobile device
+            return false;
+          }
+      }
+
+
+    // Once a barcode had been read successfully, stop quagga and 
+	// close the modal after a second to let the user notice where 
+	// the barcode had actually been found.
+	
+
 
       openAddEditCentered(content){
         this.processingAddItemDetailsDatabase = true;

@@ -20,7 +20,7 @@
 
       <input type="text" class="form-control shadow-none"  placeholder="Search...">
       <div class="input-group-append">
-        <button class="btn btn-secondary shadow-none" type="button" (click)="openVerticallyCentered(content)">
+        <button class="btn btn-secondary shadow-none" type="button" (click)="openVerticallyCentered(contentSearchUPCScannerMobile)">
           <img src="/assets/imageinv.png" width="24" height="17" style="margin-bottom: 3px;"/>
           
         </button>
@@ -221,7 +221,7 @@
 
 
 
- <ng-template #content let-modal>
+ <ng-template #contentSearchUPC let-modal>
    <alert></alert>
   <div class="modal-header">
     <h4 class="modal-title">Search by UPC</h4>
@@ -236,6 +236,27 @@
     <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
   </div>
 </ng-template>
+
+
+<ng-template #contentSearchUPCScannerMobile let-modal>
+  <alert></alert>
+ <div class="modal-header">
+   <h4 class="modal-title">Search by UPC</h4>
+   
+ </div>
+ <form [formGroup]="searchUPCForm" (ngSubmit)="getItemDataUPC()">
+ <div class="modal-body" >
+  <div id="interactive" class="viewport"></div>
+	<div class="error"></div>
+   <input class="form-control" formControlName="upcText"  type="text" placeholder="" autofocus>
+ </div>
+</form>
+ <div class="modal-footer">
+   <button type="button" class="btn btn-light" (click)="modal.close('Close click');stopQuagga()">Close</button>
+ </div>
+</ng-template>
+
+
 
 
 <ng-template #contentAddEdit let-modal>
