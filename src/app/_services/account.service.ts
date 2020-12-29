@@ -5,7 +5,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map, finalize } from 'rxjs/operators';
 
 import { environment } from '@environments/environment';
-import { Account, ItemDetails } from '@app/_models';
+import { Account, ImageLarge, ItemDetails } from '@app/_models';
 import { Item } from '@app/_models';
 
 const baseUrl = `${environment.apiUrl}` + '/account';
@@ -98,6 +98,11 @@ export class AccountService {
     getItem(UPC: string) {
         return this.http.get<Item>(`${environment.apiUrl}/products/getItemDetailsByUPC?UPC=${UPC}`,{ withCredentials: false });
     }
+
+    getItemImageByUPC(UPC: string) {
+        return this.http.get<ImageLarge>(`${environment.apiUrl}/products/getItemImageByUPC?UPC=${UPC}`,{ withCredentials: false });
+    }
+    
 
     getById(id: string) {
         return this.http.get<Account>(`${baseUrl}/get-account-id?id=${id}`);

@@ -4,3 +4,4 @@ export * from './role';
 export * from './item';
 export * from './itemCategory';
 export * from './itemDetails';
+export * from './imageLarge';

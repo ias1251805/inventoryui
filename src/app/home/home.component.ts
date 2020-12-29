@@ -157,10 +157,10 @@ export class HomeComponent {
     }
 
     openModal(targetModal, item) {
-
+        this.imageSrcModal  = "";
         
         //this.itemDetailsModalAddingStatus = true;
-        this.imageSrcModal = item.largeImage;
+        //this.imageSrcModal = item.largeImage;
         this.itemDescription = item.shortDescription;
         this.itemDetailsModalTotalStock = -1;
         this.expirationDates = [];
@@ -225,6 +225,25 @@ export class HomeComponent {
            this.formItemDetails.shortDescription.disable();
            this.formItemDetails.sellingPrice.disable();
            this.formItemDetails.category.disable();
+
+
+           
+           this.accountService.getItemImageByUPC(this.currentItem.upc)
+           .pipe(first())
+           .subscribe({
+               next: (response: any) => {
+                   
+                this.imageSrcModal = response.largeImage;
+
+               },
+               error: error => {
+                   this.alertService.error("An error ocurred while retrieving product image");
+                   this.loading = false;
+               }
+           }  
+           
+           );
+
            
         }
 
@@ -234,12 +253,13 @@ export class HomeComponent {
            }
 
 
-        addingItemToDB(){
-            
+        addingItemToDB(event){
+            this.alertService.clear;
             this.alertService.warn('<b>Add new item to database by entering category and selling price</b>' , { keepAfterRouteChange: true });    
             this.processingAddDatabase = true;
             this.formItemDetails.sellingPrice.setValue("");
             this.formItemDetails.sellingPrice.enable();
+            event.srcElement.previousElementSibling.focus();
             
         }
 
@@ -422,7 +442,9 @@ export class HomeComponent {
         }
              
 
-
+        truncateText(str: string, n:number){
+            return (str.length > n) ? str.substr(0, n-1) + '&hellip;' : str;
+          };
         
 
 }
