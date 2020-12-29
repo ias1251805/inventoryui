@@ -3,7 +3,8 @@
 import { AccountService } from './_services';
 import { Account, Role } from './_models';
 
-@Component({ selector: 'app', templateUrl: 'app.component.html' })
+import Quagga from 'quagga';
+@Component({ selector: 'app', templateUrl: 'app.component.html', styleUrls: ['./app.component.scss'] })
 export class AppComponent {
     Role = Role;
     account: Account;
@@ -14,5 +15,8 @@ export class AppComponent {
 
     logout() {
         this.accountService.logout();
+    }
+
+    handleQuogga(){Quagga.stop();
     }
 }
