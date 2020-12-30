@@ -3,7 +3,7 @@
 
 
 
-<div class="card shadow p-3 mb-5 bg-white rounded" style="margin-top: 40px; margin-bottom:80px;;">
+  <div class="card shadow p-3 mb-5 bg-white rounded" style="margin-top: 40px; margin-bottom:80px;;">
   
   <div class="card-header" >
    
@@ -229,7 +229,7 @@
   </div>
   <form [formGroup]="searchUPCForm" (ngSubmit)="getItemDataUPC()">
   <div class="modal-body">
-    <input class="form-control" formControlName="upcText"  type="text" placeholder="" autofocus>
+    <input class="form-control" formControlName="upcText"  type="text" placeholder="" >
   </div>
 </form>
   <div class="modal-footer">
@@ -248,11 +248,13 @@
  <div class="modal-body" >
   <div id="interactive" class="viewport"></div>
 	<div class="error"></div>
-   <input class="form-control" formControlName="upcText"  type="text" placeholder="" autofocus>
+   <input  *ngIf="(!this.isMobileGlobal) || (this.isMobileGlobal && scanFinished)" class="form-control" formControlName="upcText"  type="text" placeholder="" >
+   
  </div>
 </form>
  <div class="modal-footer">
-   <button type="button" class="btn btn-light" (click)="modal.close('Close click');stopQuagga()">Close</button>
+  <button *ngIf="this.isMobileGlobal " type="button" class="btn btn-primary" (click)="getItemDataUPC()" autofocus >Search</button>
+   <button type="button" class="btn btn-light" (click)="modal.close('Close click');stopQuagga()" >Close</button>
  </div>
 </ng-template>
 
@@ -279,7 +281,7 @@
     <button  type="submit" class="btn btn-primary" (click)="addItemDetailsDB()" >
       <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span> 
       Save</button>
-    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click');">Close</button>
   </div>
 </ng-template>
 

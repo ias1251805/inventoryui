@@ -11,6 +11,8 @@ import { AlertService } from '@app/_services';
 import { ActivatedRoute, Router } from '@angular/router';
 import { stringify } from '@angular/compiler/src/util';
 import Quagga from 'quagga';
+import { BeepService } from './beep.service';
+
 @Component({ templateUrl: 'home.component.html',
 styleUrls: ['./home.component.css'] })
 export class HomeComponent {
@@ -19,6 +21,7 @@ export class HomeComponent {
     addItemDetailsForm: FormGroup;
     private modalRef1: NgbModalRef;
     private modalRef2: NgbModalRef;
+    private modalRefMobile: NgbModalRef;
     public expirationSelect: any = {
         defaultLayout: ''
      }
@@ -36,8 +39,8 @@ export class HomeComponent {
     itemList: any[];
     public itemSearch: Item;
     public categoryList: string[] = ['Food','Beauty','Household','Health','Baby','Personal Care'];
-
-
+    public isMobileGlobal: boolean;
+    public scanFinished: boolean;
 
     public itemDetailsModalTotalStock: number;
     public itemDetailsModalItemId: number;
@@ -55,7 +58,7 @@ export class HomeComponent {
     items$: Observable<Item[]>;
     formFilter: FormGroup;
 
-    constructor(private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal, private activeModal: NgbActiveModal, public datepipe: DatePipe, private alertService: AlertService,private router: Router, private route: ActivatedRoute,private elementRef: ElementRef) { }
+    constructor(private beepService: BeepService,private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal, private activeModal: NgbActiveModal, public datepipe: DatePipe, private alertService: AlertService,private router: Router, private route: ActivatedRoute,private elementRef: ElementRef) { }
 
     // convenience getter for easy access to form fields
     get f() { return this.formSearch.controls; }
@@ -88,6 +91,7 @@ export class HomeComponent {
     };
 
     startQuagga(){
+        this.scanFinished = false;
         Quagga.init(
 			this.liveStreamConfig, 
 			function(err) {
@@ -96,9 +100,12 @@ export class HomeComponent {
             Quagga.onDetected((result) => {
                 
                 if (result.codeResult.code){
-                    this.formUPCSearch.upcText.setValue(result.codeResult.code);
-                    Quagga.stop();	
-                    //setTimeout(function(){ $('#livestream_scanner').modal('hide'); }, 1000);			
+                    let code: string = result.codeResult.code;
+                    
+                    this.formUPCSearch.upcText.setValue(code);
+                    
+                    this.getItemDataUPC();
+                    this.scanFinished = true;
                 }
               
             })
@@ -153,25 +160,31 @@ export class HomeComponent {
         this.modalRef2 =this.modalService.open(content, { centered: true });
        
         if(this.isMobile()){
+
             this.startQuagga()
             // this.modalRef2.componentInstance.name = 'World';
              this.modalRef2.result.then(res=>{
+
              },dismiss=>{
+                 this.scanFinished = false;
                  if (Quagga){
                      Quagga.stop();	
                  }
              })
+        }else{
+
         }
         
       }
 
 
       isMobile(){
+          console.log('Checking if is mobile')
         if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
-            // true for mobile device
+            this.isMobileGlobal = true;
             return true;
           }else{
-            // false for not mobile device
+            this.isMobileGlobal = false;
             return false;
           }
       }
@@ -191,6 +204,12 @@ export class HomeComponent {
         this.formAddItemDetails.addEditExpirationDate.setValue("");
 
         this.modalRef1 =  this.modalService.open(content, { centered: true });
+
+        this.modalRef1.result.then(res=>{
+
+        },dismiss=>{
+            this.scanFinished == false;
+        })
       }
 
 
@@ -206,6 +225,16 @@ export class HomeComponent {
     getItemDataUPC(){
 
 
+        
+
+        if(this.isMobile && this.scanFinished == true){
+            return;
+        }
+        if(this.isMobile()){
+            this.beepService.beep();
+         }
+       
+
         this.alertService.info("Searching Item with UPC: " + this.formUPCSearch.upcText.value  );
         let errorResponse: string;
 
@@ -217,14 +246,21 @@ export class HomeComponent {
                 
          this.itemSearch = resp
 
-
+            
          this.openModal(this.detailgrid, this.itemSearch);
          this.formUPCSearch.upcText.setValue("");
 
+
+        //if(this.isMobile()){
+         //  this.modalRef2.dismiss();
+       // }
+        
             },
             error: error => {
                 this.alertService.error("UPC not found" );
                 this.loading = false;
+                this.scanFinished = false;
+
             }
         }  
         
@@ -267,7 +303,11 @@ export class HomeComponent {
          size: 'lg'
         });
 
-       
+        this.modalRef2.result.then(res=>{
+
+        },dismiss=>{
+            this.scanFinished = false;
+        })
 
         
         this.editItemForm.patchValue({
@@ -303,8 +343,9 @@ export class HomeComponent {
            this.formItemDetails.category.disable();
 
 
-           
-           this.accountService.getItemImageByUPC(this.currentItem.upc)
+           if(!this.currentItem.largeImage){
+
+            this.accountService.getItemImageByUPC(this.currentItem.upc)
            .pipe(first())
            .subscribe({
                next: (response: any) => {
@@ -319,6 +360,11 @@ export class HomeComponent {
            }  
            
            );
+
+           }else{
+            this.imageSrcModal = item.largeImage;
+           }
+           
 
            
         }
