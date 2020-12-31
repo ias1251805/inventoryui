@@ -123,6 +123,13 @@ export class HomeComponent {
     }
 
     ngOnInit() {
+        let randoms: string[] = this.rand();
+        console.log('random' + randoms)
+
+        console.log('duplicated: '+ this.findDuplicates(randoms))
+
+        
+
         
         this.formSearch = this.fb.group({
             searchtxt: ['']
@@ -184,15 +191,83 @@ export class HomeComponent {
       }
 
 
-      
-      onBarcodeScanned(code: string) {
+      rand(): string[] {
+        let numbers: string[] = [];
+        let repeatedNum: number = 0;
+        let repeatedNum1: number = 0;
+        let repeatedNum2: number = 0;
+        for (let i:number = 0; i < 15; i++) {
 
+        
+
+        let randomNum1 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum2 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum3 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum4 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum5 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum6 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum7 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum8 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum9 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum10 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum11 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum12 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        let randomNum13 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        
+        
+     
+        let randomnumber = randomNum1+randomNum2+randomNum3+randomNum4+randomNum5+randomNum6+randomNum7+randomNum8+randomNum9+randomNum10+randomNum11+randomNum12;
+        
+        numbers.push(randomnumber)
+    }
+        numbers.push(numbers[5])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        return numbers;
+      }
+
+      
+
+      findDuplicates = (arr) => {
+        let sorted_arr = arr.slice().sort(); // You can define the comparing function here. 
+        // JS by default uses a crappy string compare.
+        // (we use slice to clone the array so the
+        // original array won't be modified)
+        let results = [];
+        let repeatedCount = 0;
+        for (let i = 0; i < sorted_arr.length - 1; i++) {
+            
+          if (sorted_arr[i + 1] == sorted_arr[i]) {
+            repeatedCount = repeatedCount + 1;
+            results.push(repeatedCount + '-' + sorted_arr[i]);
+          }else{
+            repeatedCount = 0;
+          }
+        }
+
+        let new_sorted_arr = results.slice().sort();
+        console.log(new_sorted_arr);
+        console.log(new_sorted_arr[new_sorted_arr.length-1])
+        return new_sorted_arr[new_sorted_arr.length-1].split("-")[1];
+      }
+
+
+      onBarcodeScanned(code: string) {
+       
+
+
+
+
+       
+        this.formUPCSearch.upcText.setValue(code);
         // ignore duplicates for an interval of 1.5 seconds
         const now = new Date().getTime();
         if (code === this.lastScannedCode && (now < this.lastScannedCodeDate + 1500)) {
           return;
         }
-    
+        this.formUPCSearch.upcText.setValue(code);
+
         this.beepService.beep();
 
         this.getItemDataUPC();
