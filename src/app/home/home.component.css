@@ -8,3 +8,7 @@
     height:0px;
 }
 
+.no-margin-custom {
+	margin-right:0!important;
+	padding-right:0!important;
+}

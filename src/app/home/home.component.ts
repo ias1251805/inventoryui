@@ -1,4 +1,4 @@
-﻿import { Component, ElementRef, Pipe, PipeTransform, TemplateRef, ViewChild } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, ElementRef, Pipe, PipeTransform, TemplateRef, ViewChild } from '@angular/core';
 
 import { AccountService } from '@app/_services';
 import { FormGroup, FormBuilder } from '@angular/forms';
@@ -50,6 +50,9 @@ export class HomeComponent {
     public processingAddDatabase: boolean;
     public currentItem: Item;
     public processingAddItemDetailsDatabase: boolean;
+    public searchUPCMobileResult: boolean = true;
+    public lastScannedCode: string;
+    public lastScannedCodeDate: number;
 
     value: string;
 
@@ -58,7 +61,7 @@ export class HomeComponent {
     items$: Observable<Item[]>;
     formFilter: FormGroup;
 
-    constructor(private beepService: BeepService,private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal, private activeModal: NgbActiveModal, public datepipe: DatePipe, private alertService: AlertService,private router: Router, private route: ActivatedRoute,private elementRef: ElementRef) { }
+    constructor(private changeDetectorRef: ChangeDetectorRef,private beepService: BeepService,private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal, private activeModal: NgbActiveModal, public datepipe: DatePipe, private alertService: AlertService,private router: Router, private route: ActivatedRoute,private elementRef: ElementRef) { }
 
     // convenience getter for easy access to form fields
     get f() { return this.formSearch.controls; }
@@ -103,9 +106,12 @@ export class HomeComponent {
                     let code: string = result.codeResult.code;
                     
                     this.formUPCSearch.upcText.setValue(code);
+                    this.onBarcodeScanned(code);
+                   // this.searchUPCMobileResult = this.getItemDataUPC();
                     
-                    this.getItemDataUPC();
-                    this.scanFinished = true;
+                    
+
+                    
                 }
               
             })
@@ -160,7 +166,7 @@ export class HomeComponent {
         this.modalRef2 =this.modalService.open(content, { centered: true });
        
         if(this.isMobile()){
-
+            this.searchUPCMobileResult = true;
             this.startQuagga()
             // this.modalRef2.componentInstance.name = 'World';
              this.modalRef2.result.then(res=>{
@@ -176,6 +182,28 @@ export class HomeComponent {
         }
         
       }
+
+
+      
+      onBarcodeScanned(code: string) {
+
+        // ignore duplicates for an interval of 1.5 seconds
+        const now = new Date().getTime();
+        if (code === this.lastScannedCode && (now < this.lastScannedCodeDate + 1500)) {
+          return;
+        }
+    
+        this.beepService.beep();
+
+        this.getItemDataUPC();
+    
+        this.lastScannedCode = code;
+        this.lastScannedCodeDate = now;
+        
+        this.changeDetectorRef.detectChanges();
+        this.scanFinished = false;
+      }
+    
 
 
       isMobile(){
@@ -222,18 +250,12 @@ export class HomeComponent {
         return totalQuantity;
       }
 
-    getItemDataUPC(){
+    getItemDataUPC(): boolean{
 
 
         
 
-        if(this.isMobile && this.scanFinished == true){
-            return;
-        }
-        if(this.isMobile()){
-            this.beepService.beep();
-         }
-       
+
 
         this.alertService.info("Searching Item with UPC: " + this.formUPCSearch.upcText.value  );
         let errorResponse: string;
@@ -249,7 +271,7 @@ export class HomeComponent {
             
          this.openModal(this.detailgrid, this.itemSearch);
          this.formUPCSearch.upcText.setValue("");
-
+        return true;
 
         //if(this.isMobile()){
          //  this.modalRef2.dismiss();
@@ -259,13 +281,15 @@ export class HomeComponent {
             error: error => {
                 this.alertService.error("UPC not found" );
                 this.loading = false;
-                this.scanFinished = false;
+                //this.scanFinished = false;
+                return false;
 
             }
         }  
         
         );
         
+        return true;
     }
 
     openModal(targetModal, item) {
