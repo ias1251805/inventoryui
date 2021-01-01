@@ -5,9 +5,9 @@
 export const environment = {
   production: false,
   //apiUrl: 'http://localhost:4000'
-  //apiUrl: 'http://localhost:8080'
+  apiUrl: 'http://localhost:8080'
   //apiUrl: 'http://192.168.0.18:82'
-  apiUrl: 'https://inventoryapi.pihome.cloud'
+  //apiUrl: 'https://inventoryapi.pihome.cloud'
 };
 
 /*

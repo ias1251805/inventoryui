@@ -53,7 +53,7 @@
      <tbody>
       <tr *ngFor="let item of itemList" (click)="openModal(editItemModal, item)" style = "cursor: pointer;">
        <th class= "" scope="row">{{ item.itemId }}</th>
-       <td>{{ item.name.split(",")[0] }}</td>
+       <td>{{ item.name.split(",")[0].length>32?item.name.split(",")[0].substr(0,32):item.name.split(",")[0] }}</td>
        <td >{{ item.salePrice  | currency}}</td>
        <td class="text-center">{{ getTotalQuantity(item.itemDetails) }}</td>
        <td class="text-center d-none d-sm-table-cell">{{ item.upc }}</td>
@@ -189,7 +189,7 @@
       <textarea class="form-control shadow-none" formControlName="shortDescription" aria-label="Small" aria-describedby="inputGroup-sizing-sm"></textarea>
     </div>
 
-    <div *ngIf="itemDetailsModalTotalStock>0"  class="input-group input-group-sm mb-3" >
+    <div *ngIf="itemDetailsModalTotalStock>0 && processingAddDatabase==false"   class="input-group input-group-sm mb-3" >
       <div class="input-group-prepend">
         <span class="input-group-text" id="expirationDateSelect">Expiration Date</span>
       </div>
@@ -204,8 +204,9 @@
 
     <div class="modal-footer" style="padding-left: 0;padding-right: 0;">
      <button type="button" class="btn btn-secondary" style="margin-right: auto;" (click)="modal.dismiss()" autofocus>Close</button>
-     <button *ngIf="itemDetailsModalTotalStock>=0" type="submit" class="btn btn-success" (click)="openAddEditCentered(contentAddEdit)">+ Add</button>
-     <button *ngIf="itemDetailsModalTotalStock<0 && processingAddDatabase==false" type="submit" class="btn btn-success" (click)="addingItemToDB($event)">+ Add to DB</button>
+     <button *ngIf="itemDetailsModalTotalStock>=0 && processingAddDatabase==false" type="submit" class="btn btn-primary" (click)="addingItemToDB($event)" name= "editItem" id="editItem">Edit</button>
+     <button *ngIf="itemDetailsModalTotalStock>=0 && processingAddDatabase==false" type="submit" class="btn btn-success" (click)="openAddEditCentered(contentAddEdit)">+ Add</button>
+     <button *ngIf="itemDetailsModalTotalStock<0 && processingAddDatabase==false" type="submit" class="btn btn-success" name= "addItemDB" (click)="addingItemToDB($event)">+ Add to DB</button>
      <button *ngIf="processingAddDatabase==false" type="submit" class="btn btn-danger" [disabled]="itemDetailsModalTotalStock<=0">- Deduct</button>
      <button *ngIf="processingAddDatabase" type="submit" class="btn btn-primary" (click)="saveItemData()" >
       <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span> 
@@ -240,20 +241,33 @@
 
 <ng-template #contentSearchUPCScannerMobile let-modal>
   <alert></alert>
+
+  
+  <div *ngIf="searchingUPC" class="d-flex justify-content-center text-primary" style="padding-top: 30px;"> 
+    <div class="spinner-border" role="status" > 
+        <span class="sr-only loading" id="loading"></span> 
+    </div> 
+</div> 
+
+<div class="d-flex justify-content-center text-primary" style="padding-top: 30px;"> 
+  <span  class="badge badge-pill badge-info" id="labelPercentage"></span>
+</div> 
+  
+ 
  <div class="modal-header">
    <h4 class="modal-title">Search by UPC</h4>
    
  </div>
- <form [formGroup]="searchUPCForm" (ngSubmit)="getItemDataUPC()">
+ <form [formGroup]="searchUPCForm" (ngSubmit)="getItemDataUPC(false)">
  <div class="modal-body" >
   <div id="interactive" class="viewport"></div>
 	<div class="error"></div>
-   <input  *ngIf="(!this.isMobileGlobal) || (this.isMobileGlobal && scanFinished)" class="form-control" formControlName="upcText"  type="text" placeholder="" >
+   <input  *ngIf="(!this.isMobileGlobal) || (!scanUPCSearchFound && codeValdiationResult!='')" class="form-control" formControlName="upcText"  type="text" placeholder="" >
    
  </div>
 </form>
  <div class="modal-footer">
-  <button *ngIf="this.isMobileGlobal " type="button" class="btn btn-primary" (click)="getItemDataUPC()" autofocus >Search</button>
+  <button *ngIf="this.isMobileGlobal " [disabled]="scanUPCSearchFound" type="button" class="btn btn-primary" (click)="getItemDataUPC(true)" autofocus >Search</button>
    <button type="button" class="btn btn-light" (click)="modal.close('Close click');stopQuagga()" >Close</button>
  </div>
 </ng-template>

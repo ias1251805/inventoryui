@@ -53,7 +53,12 @@ export class HomeComponent {
     public searchUPCMobileResult: boolean = true;
     public lastScannedCode: string;
     public lastScannedCodeDate: number;
-
+    public codes: string[] = [];
+    public codeValdiationResult = "";
+    public searchingUPC: boolean;
+    public scanIsProcessing: boolean;
+    public scanUPCSearchFound: boolean;
+    public scanAccuracyReachedMobile: boolean;
     value: string;
 
 
@@ -94,6 +99,10 @@ export class HomeComponent {
     };
 
     startQuagga(){
+        this.scanIsProcessing = false;
+        this.codes = [];
+        document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
+        this.codeValdiationResult = "";
         this.scanFinished = false;
         Quagga.init(
 			this.liveStreamConfig, 
@@ -103,10 +112,45 @@ export class HomeComponent {
             Quagga.onDetected((result) => {
                 
                 if (result.codeResult.code){
-                    let code: string = result.codeResult.code;
-                    
-                    this.formUPCSearch.upcText.setValue(code);
-                    this.onBarcodeScanned(code);
+                    this.codes.push(result.codeResult.code)
+                   // console.log(this.codes)
+
+                    //let code: string = result.codeResult.code;
+                    this.codeValdiationResult = this.validateScanResult(this.codes);
+                    if(this.codeValdiationResult!=""){
+                        const now = new Date().getTime();
+                        if (this.codeValdiationResult === this.lastScannedCode && (now < this.lastScannedCodeDate + 3000)) {
+                          console.log('same code within 3000 milliseconds' + this.codeValdiationResult)
+                          this.codes = [];  
+                          //document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
+                        }else{
+                            this.formUPCSearch.upcText.setValue(this.codeValdiationResult);
+                            this.beepService.beep();
+                            if(this.getItemDataUPC(true)){
+                            this.lastScannedCode = this.codeValdiationResult;
+                            this.scanUPCSearchFound = true;
+                            this.codeValdiationResult = "";
+                            }else{
+                                this.lastScannedCode = this.codeValdiationResult;
+                                this.scanUPCSearchFound = false;
+                            //this.codeValdiationResult = "";
+                                   
+                            
+                            }
+                            this.lastScannedCodeDate = now;
+                            this.changeDetectorRef.detectChanges();
+                            this.scanFinished = false;
+                            this.codes = [];    
+                            document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%"; 
+                            //this.onBarcodeScanned(code);
+                        }
+
+
+                        
+                    }
+
+                    console.log(this.codes)
+                    console.log(this.codeValdiationResult)
                    // this.searchUPCMobileResult = this.getItemDataUPC();
                     
                     
@@ -124,9 +168,9 @@ export class HomeComponent {
 
     ngOnInit() {
         let randoms: string[] = this.rand();
-        console.log('random' + randoms)
-
-        console.log('duplicated: '+ this.findDuplicates(randoms))
+        
+        //console.log("Valid number: " + this.validateScanResult(randoms))
+        
 
         
 
@@ -196,7 +240,7 @@ export class HomeComponent {
         let repeatedNum: number = 0;
         let repeatedNum1: number = 0;
         let repeatedNum2: number = 0;
-        for (let i:number = 0; i < 15; i++) {
+        for (let i:number = 0; i < 5; i++) {
 
         
 
@@ -210,26 +254,118 @@ export class HomeComponent {
         let randomNum8 = String(Math.floor(Math.random() * (9 - 0) + 0));
         let randomNum9 = String(Math.floor(Math.random() * (9 - 0) + 0));
         let randomNum10 = String(Math.floor(Math.random() * (9 - 0) + 0));
-        let randomNum11 = String(Math.floor(Math.random() * (9 - 0) + 0));
-        let randomNum12 = String(Math.floor(Math.random() * (9 - 0) + 0));
-        let randomNum13 = String(Math.floor(Math.random() * (9 - 0) + 0));
+        
         
         
      
-        let randomnumber = randomNum1+randomNum2+randomNum3+randomNum4+randomNum5+randomNum6+randomNum7+randomNum8+randomNum9+randomNum10+randomNum11+randomNum12;
+        let randomnumber = randomNum1+randomNum2+randomNum3+randomNum4+randomNum5+randomNum6+randomNum7+randomNum8+randomNum9+randomNum10;
         
         numbers.push(randomnumber)
+        
     }
-        numbers.push(numbers[5])
+        console.log('Random numbers after looping: ' + numbers)
+        
         numbers.push(numbers[4])
         numbers.push(numbers[4])
         numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+        numbers.push(numbers[4])
+
+        console.log('Random numbers after copying: ' + numbers)
         return numbers;
       }
 
       
 
+      validateScanResult(arr): string{
+          console.log('Entering to validate Scan Result')
+          console.log('Entering to validate Scan Result - Printing array: ' + arr)
+
+          if(this.scanIsProcessing == true){
+            console.log("Entering to validate Scan Result-Blocked attempt to look for item while processing is in progress for " + arr)
+            this.codes = [];  
+            document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
+            return "";  
+        }
+
+        if(this.codeValdiationResult!= ""){
+            console.log('Entering to validate Scan Result - Printing codevalidationresult from function: returning, code validation result is not empty: ' + this.codeValdiationResult)
+            return "";
+        }
+
+        let validCode: string = "";
+        let totalElements = arr.length;
+        if (totalElements < 30){
+            console.log('Entering to validate Scan Result - Printing codevalidationresult from function: returning because is less than 30' + this.codeValdiationResult)
+            validCode = ""
+            return "";
+        } 
+
+
+
+
+        let duplicatedDetails = this.findDuplicates(arr);
+            let totalRepeated = Number(duplicatedDetails.split("-")[0])
+            let duplicatedCode = duplicatedDetails.split("-")[1]
+
+        if (totalElements == 30) {            
+            if(totalRepeated == totalElements){
+                validCode = duplicatedCode;
+                console.log('Entering to validate Scan Result - returning because valid code is 10' + duplicatedDetails)
+                return validCode;
+            }
+        
+        }
+
+ 
+
+        
+
+        if ((totalRepeated/totalElements) >= .75 ) {            
+            this.scanAccuracyReachedMobile = true;
+            validCode = duplicatedCode;
+
+            document.getElementById("labelPercentage").innerHTML="Scan Accuracy: " + String(((totalRepeated/totalElements)/.75)*100).split(".")[0] + "%";
+            
+        }else {
+            if((totalRepeated/totalElements) < .75){
+                document.getElementById("labelPercentage").innerHTML="Scan Accuracy: " + String(((totalRepeated/totalElements)/.75)*100).split(".")[0] + "%";
+            }
+        }
+        
+        console.log('Repeated: ' + (totalRepeated))
+        console.log('Total Elements: ' + (totalElements))
+        console.log('Calculation: ' + (totalRepeated/totalElements))
+        
+
+        return validCode;
+
+      }
+
       findDuplicates = (arr) => {
+
+        console.log('Entering to find duplicates function')
+        
+        console.log('Entering to find duplicates function - Total elements: ' + arr.length)
+
+
+
         let sorted_arr = arr.slice().sort(); // You can define the comparing function here. 
         // JS by default uses a crappy string compare.
         // (we use slice to clone the array so the
@@ -246,10 +382,34 @@ export class HomeComponent {
           }
         }
 
-        let new_sorted_arr = results.slice().sort();
-        console.log(new_sorted_arr);
-        console.log(new_sorted_arr[new_sorted_arr.length-1])
-        return new_sorted_arr[new_sorted_arr.length-1].split("-")[1];
+        //let new_sorted_arr = results.slice().sort();
+        //console.log(new_sorted_arr);
+        //console.log(new_sorted_arr[new_sorted_arr.length-1])
+        let arrayNumbersTotalRepeated = [];
+        for (let i = 0; i < results.length - 1; i++) {
+            let currentNumber = Number(results[i].split("-")[0])
+            arrayNumbersTotalRepeated.push(currentNumber)
+        }
+
+        console.log('printing array numbers: ' + arrayNumbersTotalRepeated);
+
+        let new_sorted_arr_numbers = arrayNumbersTotalRepeated.slice().sort(function(a, b){return b-a});
+
+        console.log('printing array numbers sorted: ' + new_sorted_arr_numbers);
+
+        let maxRepeated = new_sorted_arr_numbers[0];
+
+        console.log('Entering to find duplicates function max repeated number : ' + maxRepeated)
+
+        console.log('printing results: ' + results)
+
+
+        let resultString = String(results.filter(s => s.includes(String(maxRepeated)+"-")));
+        console.log('Entering to find duplicates function index of results:  ' + maxRepeated+"-" + "   actual comparision" + resultString);
+        
+
+        console.log('Entering to find duplicates function - Number found repeated max times: ' + new_sorted_arr_numbers)
+        return resultString;
       }
 
 
@@ -270,7 +430,7 @@ export class HomeComponent {
 
         this.beepService.beep();
 
-        this.getItemDataUPC();
+        //this.getItemDataUPC();
     
         this.lastScannedCode = code;
         this.lastScannedCodeDate = now;
@@ -325,17 +485,36 @@ export class HomeComponent {
         return totalQuantity;
       }
 
-    getItemDataUPC(): boolean{
+    getItemDataUPC(isMobileSearch:boolean): boolean{
+       
+        ////TESTING LABEL
+       
+       
+
+        ////
 
 
+        if(this.formUPCSearch.upcText.value==""){
+            this.alertService.error("UPC Not provided");  
+            return false;  
+        }
+
+        if(this.scanIsProcessing == true){
+            console.log("Blocked attempt to look for item while processing is in progress for " + this.formUPCSearch.upcText.value)
+            return false;  
+        }
+
+        this.scanIsProcessing = true;
+
+        let upcCode = this.formUPCSearch.upcText.value;
         
+        this.searchingUPC = true;
 
 
-
-        this.alertService.info("Searching Item with UPC: " + this.formUPCSearch.upcText.value  );
+        this.alertService.info("Searching Item with UPC: " + upcCode  );
         let errorResponse: string;
 
-        this.accountService.getItem(this.formUPCSearch.upcText.value)
+        this.accountService.getItem(upcCode)
         .pipe(first())
         .subscribe({
             next: (resp: any) => {
@@ -343,9 +522,11 @@ export class HomeComponent {
                 
          this.itemSearch = resp
 
-            
-         this.openModal(this.detailgrid, this.itemSearch);
+        
+         this.openModal(this.detailgrid, this.itemSearch,isMobileSearch);
          this.formUPCSearch.upcText.setValue("");
+         this.searchingUPC = false;
+         //this.scanIsProcessing = false;
         return true;
 
         //if(this.isMobile()){
@@ -355,7 +536,10 @@ export class HomeComponent {
             },
             error: error => {
                 this.alertService.error("UPC not found" );
+                this.formUPCSearch.upcText.setValue(upcCode);
                 this.loading = false;
+                this.scanIsProcessing = false;
+                this.searchingUPC = false;
                 //this.scanFinished = false;
                 return false;
 
@@ -367,7 +551,7 @@ export class HomeComponent {
         return true;
     }
 
-    openModal(targetModal, item) {
+    openModal(targetModal, item, isMobileSearch:boolean) {
         this.imageSrcModal  = "";
         
         //this.itemDetailsModalAddingStatus = true;
@@ -405,6 +589,11 @@ export class HomeComponent {
         this.modalRef2.result.then(res=>{
 
         },dismiss=>{
+            //if(isMobileSearch){
+                this.scanIsProcessing = false;
+                document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
+                
+            //}
             this.scanFinished = false;
         })
 
@@ -423,7 +612,7 @@ export class HomeComponent {
            if(item.itemDetails){
             this.editItemForm.patchValue({
                 sellingPrice: item.sellingPrice,
-            category: item.category.name?item.category.name:''
+                category:  item.category.name?item.category.name:''
                 
     
                });
@@ -475,17 +664,74 @@ export class HomeComponent {
 
 
         addingItemToDB(event){
-            this.alertService.clear;
-            this.alertService.warn('<b>Add new item to database by entering category and selling price</b>' , { keepAfterRouteChange: true });    
+            
             this.processingAddDatabase = true;
-            this.formItemDetails.sellingPrice.setValue("");
-            this.formItemDetails.sellingPrice.enable();
-            event.srcElement.previousElementSibling.focus();
+            this.alertService.clear;
+            if(event.target.name == "editItem"){
+                this.alertService.warn('<b>Edit Item details</b>' , { keepAfterRouteChange: true });  
+                this.formItemDetails.name.enable();
+                this.formItemDetails.salePrice.enable();
+                this.formItemDetails.upc.enable();
+                this.formItemDetails.brandName.enable();
+                this.formItemDetails.shortDescription.enable();
+                this.formItemDetails.sellingPrice.enable();
+                
+                this.formItemDetails.categorySelect.setValue(this.categoryList.indexOf(this.formItemDetails.category.value)+1)
+                //this.formAddItemDetails.expirationDateSelect.disable();
+
+                
+            }else{
+                this.alertService.warn('<b>Add new item to database by entering category and selling price</b>' , { keepAfterRouteChange: true }); 
+                this.formItemDetails.categorySelect.setValue("");
+                this.formItemDetails.sellingPrice.setValue("");
+                this.formItemDetails.sellingPrice.enable();
+                event.srcElement.previousElementSibling.focus(); 
+            }
+
+
+            
+           // 
+            //  
+            //
+
             
         }
 
 
         saveItemData(){
+
+            let isAdd:boolean;
+            let messageDisplayed = "";
+            let currentItemID;
+            if(Number(this.currentItem.sellingPrice)>0){
+                isAdd = false;
+                currentItemID = this.currentItem.itemId
+                messageDisplayed = "Item edited successfully"
+
+            }else{
+                isAdd = true;
+                messageDisplayed = 'Item added successfully to Database'
+            }
+            
+           
+            if(this.formItemDetails.name.value == ""){
+                this.alertService.clear();
+                this.alertService.error("Provide item name");
+                return;
+            }
+
+            if(this.formItemDetails.upc.value == ""){
+                this.alertService.clear();
+                this.alertService.error("Provide UPC value");
+                return;
+            }
+
+            if(this.formItemDetails.name.value == ""){
+                this.alertService.clear();
+                this.alertService.error("Provide item name");
+                return;
+            }
+
             
             if((this.formItemDetails.sellingPrice.value == "") && (this.formItemDetails.categorySelect.value == "")){
                 this.alertService.clear();
@@ -514,8 +760,43 @@ export class HomeComponent {
 
             //Resetting values after success call to saving Item
 
+            if(isAdd){
 
-            this.accountService.saveItemDB(this.currentItem)
+                this.accountService.saveItemDB(this.currentItem)
+                .pipe(first())
+                .subscribe({
+                    next: (response: any) => {
+                        console.log(response.itemId);
+                        this.itemDetailsModalItemId = response.itemId;
+                        this.currentItem.itemId = response.itemId;
+                        this.alertService.clear();
+                        this.alertService.success(messageDisplayed, { keepAfterRouteChange: true });
+                        this.formItemDetails.category.setValue(this.categoryList[Number(this.formItemDetails.categorySelect.value) - 1])
+                        this.formItemDetails.sellingPrice.disable();
+                        this.itemDetailsModalTotalStock = 0;
+                        this.processingAddDatabase = false;
+
+                    },
+                    error: error => {
+                        this.alertService.error("An error ocurred saving the item");
+                        this.loading = false;
+                    }
+                }  
+                
+                );
+        }else{
+
+
+
+            this.currentItem.brandName = this.formItemDetails.brandName.value;
+            this.currentItem.name = this.formItemDetails.name.value;
+            this.currentItem.salePrice = this.formItemDetails.salePrice.value;
+            this.currentItem.sellingPrice = this.formItemDetails.sellingPrice.value;
+            this.currentItem.upc = this.formItemDetails.upc.value;
+            this.currentItem.shortDescription = this.formItemDetails.shortDescription.value;
+            
+
+            this.accountService.editItemDB(this.currentItem)
             .pipe(first())
             .subscribe({
                 next: (response: any) => {
@@ -523,24 +804,28 @@ export class HomeComponent {
                     this.itemDetailsModalItemId = response.itemId;
                     this.currentItem.itemId = response.itemId;
                     this.alertService.clear();
-                    this.alertService.success('Item added successfully to Database', { keepAfterRouteChange: true });
+                    this.alertService.success(messageDisplayed, { keepAfterRouteChange: true });
                     this.formItemDetails.category.setValue(this.categoryList[Number(this.formItemDetails.categorySelect.value) - 1])
                     this.formItemDetails.sellingPrice.disable();
-                    this.itemDetailsModalTotalStock = 0;
+                    //this.itemDetailsModalTotalStock = 0;
                     this.processingAddDatabase = false;
+                    this.formItemDetails.name.disable();
+                    this.formItemDetails.salePrice.disable();
+                    this.formItemDetails.upc.disable();
+                    this.formItemDetails.brandName.disable();
+                    this.formItemDetails.shortDescription.disable();
+                    this.formItemDetails.sellingPrice.disable();
 
                 },
                 error: error => {
-                    this.alertService.error("An error ocurred");
+                    this.alertService.error("An error ocurred editing the item");
                     this.loading = false;
                 }
             }  
             
             );
 
-            
-            
-            
+        }
         }
 
 
@@ -624,7 +909,7 @@ export class HomeComponent {
                     
 
                     this.modalRef2.close();
-                     this.openModal(this.detailgrid, this.itemSearch);
+                     this.openModal(this.detailgrid, this.itemSearch,true);
                      this.formUPCSearch.upcText.setValue("");
                      this.processingAddItemDetailsDatabase = false;
                      //this.alertService.clear();

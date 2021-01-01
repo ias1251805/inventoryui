@@ -47,6 +47,10 @@ export class AccountService {
         return this.http.post<any>(`${environment.apiUrl}/products/addItem`, item);
     }
 
+    editItemDB(item: Item) {
+        return this.http.post<any>(`${environment.apiUrl}/products/editItem`, item);
+    }
+
     addItemDetailsDB(itemDetails: ItemDetails) {
         return this.http.post<any>(`${environment.apiUrl}/products/addItemDetails`, itemDetails);
     }
