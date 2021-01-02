@@ -16,12 +16,16 @@ import { BeepService } from './beep.service';
 @Component({ templateUrl: 'home.component.html',
 styleUrls: ['./home.component.css'] })
 export class HomeComponent {
+    
     formSearch: FormGroup;
     searchUPCForm: FormGroup;
     addItemDetailsForm: FormGroup;
     private modalRef1: NgbModalRef;
     private modalRef2: NgbModalRef;
     private modalRefMobile: NgbModalRef;
+
+    searchNameMain: string="";
+
     public expirationSelect: any = {
         defaultLayout: ''
      }
@@ -41,7 +45,7 @@ export class HomeComponent {
     public categoryList: string[] = ['Food','Beauty','Household','Health','Baby','Personal Care'];
     public isMobileGlobal: boolean;
     public scanFinished: boolean;
-
+    public searchName:string;
     public itemDetailsModalTotalStock: number;
     public itemDetailsModalItemId: number;
     public itemDetails: ItemDetails[];
@@ -111,7 +115,7 @@ export class HomeComponent {
     startQuagga(){
         this.scanIsProcessing = false;
         this.codes = [];
-        document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
+        //document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
         this.codeValdiationResult = "";
         this.scanFinished = false;
         Quagga.init(
@@ -151,7 +155,7 @@ export class HomeComponent {
                             this.changeDetectorRef.detectChanges();
                             this.scanFinished = false;
                             this.codes = [];    
-                            document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%"; 
+                           // document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%"; 
                             //this.onBarcodeScanned(code);
                         }
 
@@ -180,8 +184,6 @@ export class HomeComponent {
         let randoms: string[] = this.rand();
         
         //console.log("Valid number: " + this.validateScanResult(randoms))
-        
-
         
 
         
@@ -345,7 +347,7 @@ export class HomeComponent {
           if(this.scanIsProcessing == true){
            // console.log("Entering to validate Scan Result-Blocked attempt to look for item while processing is in progress for " + arr)
             this.codes = [];  
-            document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
+            //document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
             return "";  
         }
 
@@ -386,11 +388,11 @@ export class HomeComponent {
             this.scanAccuracyReachedMobile = true;
             validCode = duplicatedCode;
 
-            document.getElementById("labelPercentage").innerHTML="Scan Accuracy: " + String(((totalRepeated/totalElements)/.75)*100).split(".")[0] + "%";
+           // document.getElementById("labelPercentage").innerHTML="Scan Accuracy: " + String(((totalRepeated/totalElements)/.75)*100).split(".")[0] + "%";
             
         }else {
             if((totalRepeated/totalElements) < .75){
-                document.getElementById("labelPercentage").innerHTML="Scan Accuracy: " + String(((totalRepeated/totalElements)/.75)*100).split(".")[0] + "%";
+                //document.getElementById("labelPercentage").innerHTML="Scan Accuracy: " + String(((totalRepeated/totalElements)/.75)*100).split(".")[0] + "%";
             }
         }
         

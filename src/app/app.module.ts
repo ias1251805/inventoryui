@@ -1,6 +1,6 @@
 ﻿import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule,FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -15,6 +15,8 @@ import { AlertComponent } from './_components';
 import { HomeComponent } from './home';
 import { DatePipe } from '@angular/common';;
 import { NoopAnimationsModule } from '@angular/platform-browser/animations'
+;
+import { FilterPipe } from './filter.pipe'
 
 
 @NgModule({
@@ -24,13 +26,15 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations'
         HttpClientModule,
         AppRoutingModule,
         NgbModule,
-        NoopAnimationsModule,
+        NoopAnimationsModule,FormsModule
         
     ],
     declarations: [
         AppComponent,
         AlertComponent,
         HomeComponent
+,
+        FilterPipe
     ],
     providers: [
         NgbActiveModal,

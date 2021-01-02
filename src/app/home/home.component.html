@@ -17,14 +17,16 @@
     <div class="input-group col-md-4 no-gutters" style="margin-left: auto;margin-top: 25px;padding-right: 0px;padding-left: 0px;">
 
      
-
-      <input type="text" class="form-control shadow-none"  placeholder="Search...">
+      
+      <input type="text" class="form-control shadow-none"  placeholder="Search..." [(ngModel)]="searchNameMain" >
+    
       <div class="input-group-append">
         <button class="btn btn-secondary shadow-none" type="button" (click)="openVerticallyCentered(contentSearchUPCScannerMobile)">
           <img src="/assets/imageinv.png" width="24" height="17" style="margin-bottom: 3px;"/>
           
         </button>
       </div>
+   
     </div>
 
 
@@ -68,12 +70,18 @@
       </tr>
      </thead>
      <tbody>
-      <tr *ngFor="let item of itemList" (click)="openModal(editItemModal, item)" style = "cursor: pointer;">
+      <tr *ngFor="let item of itemList | filter:searchNameMain" (click)="openModal(editItemModal, item)" style = "cursor: pointer;">
        <th class= "" scope="row">{{ item.itemId }}</th>
-       <td>{{ item.name.split(",")[0].length>32?item.name.split(",")[0].substr(0,32):item.name.split(",")[0] }}</td>
+       <td>
+        
+        <ngb-highlight [result]="item.name.split(',')[0].length>32?item.name.split(',')[0].substr(0,32):item.name.split(',')[0]" [term]="searchNameMain"></ngb-highlight>
+        </td>
        <td >{{ item.salePrice  | currency}}</td>
        <td class="text-center">{{ getTotalQuantity(item.itemDetails) }}</td>
-       <td class="text-center d-none d-sm-table-cell">{{ item.upc }}</td>
+       <td class="text-center d-none d-sm-table-cell">
+        
+         <ngb-highlight [result]="item.upc" [term]="searchNameMain"></ngb-highlight>
+        </td>
        <td class="text-center d-none d-sm-table-cell">Link</td>
        <td class=" text-center"><img src="data:image/png;base64,{{item.thumbnailImage}}" width="40" height="35" class="img-thumbnail" /></td>
       </tr>
@@ -265,11 +273,11 @@
         <span class="sr-only loading" id="loading"></span> 
     </div> 
 </div> 
-
+<!--
 <div class="d-flex justify-content-center text-primary" style="padding-top: 30px;"> 
   <span  class="badge badge-pill badge-info" id="labelPercentage"></span>
 </div> 
-  
+  -->
  
  <div class="modal-header">
    <h4 class="modal-title">Search by UPC</h4>
