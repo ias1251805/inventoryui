@@ -3,7 +3,7 @@
 
 
 
-  <div class="card shadow-lg p-3 mb-5 bg-white rounded" style="margin-top: 40px; margin-bottom:80px;;">
+  <div class="card shadow p-3 mb-5 bg-white rounded" style="margin-top: 40px; margin-bottom:80px;;">
   
   <div class="card-header" >
    
@@ -36,9 +36,26 @@
   
  
   <div class="row justify-content-center">
+    <table class="table table-borderless">
+      <thead>
+        <tr>       
+         <th scope="col" class="text-center">Total Unique Items</th>
+         <th scope="col" class="text-center">Total Detailed Items</th>
+         <th class="text-center" scope="col" >Total Retail Price</th>
+         <th class="text-center " scope="col">Total Selling Price</th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr >
+         <td class="text-center">{{totalUniqueItems}}</td>
+         <td class="text-center">{{totalDetailedItems}}</td>
+         <td class="text-center">{{totalRetailPrice | currency}}</td>
+         <td class="text-center">{{totalSellingPrice | currency}}</td>
+        </tr>
+       </tbody>
+    </table>
     
-    
-    <table class="table table-hover ">
+    <table class="table table-hover " style="padding-top: 70px;">
      <thead>
       <tr>
        <th class="" scope="col" class="no-margin-custom">#</th>

@@ -59,6 +59,12 @@ export class HomeComponent {
     public scanIsProcessing: boolean;
     public scanUPCSearchFound: boolean;
     public scanAccuracyReachedMobile: boolean;
+    public totalUniqueItems: number = 0;
+    public totalDetailedItems: number = 0;
+    public totalRetailPrice: number = 0;
+    public totalSellingPrice: number = 0;
+
+
     value: string;
 
 
@@ -98,6 +104,10 @@ export class HomeComponent {
         locate: true
     };
 
+    formatMoney(number) {
+        return number.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+      }
+
     startQuagga(){
         this.scanIsProcessing = false;
         this.codes = [];
@@ -120,7 +130,7 @@ export class HomeComponent {
                     if(this.codeValdiationResult!=""){
                         const now = new Date().getTime();
                         if (this.codeValdiationResult === this.lastScannedCode && (now < this.lastScannedCodeDate + 3000)) {
-                          console.log('same code within 3000 milliseconds' + this.codeValdiationResult)
+                          //console.log('same code within 3000 milliseconds' + this.codeValdiationResult)
                           this.codes = [];  
                           //document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
                         }else{
@@ -149,8 +159,8 @@ export class HomeComponent {
                         
                     }
 
-                    console.log(this.codes)
-                    console.log(this.codeValdiationResult)
+                   // console.log(this.codes)
+                    //console.log(this.codeValdiationResult)
                    // this.searchUPCMobileResult = this.getItemDataUPC();
                     
                     
@@ -189,10 +199,16 @@ export class HomeComponent {
             addEditExpirationDate: ['']
         })
         
+        
         this.accountService.getAllItems()
             .pipe(first())
-            .subscribe(itemList => this.itemList = itemList);
-
+            .subscribe(itemList => 
+            
+            
+            
+            
+            this.itemList = itemList);
+                
             this.editItemForm = this.fb.group({
                 name: [''],
                 msrp: [''],
@@ -206,6 +222,35 @@ export class HomeComponent {
                 category: [''],
                 categorySelect: ['']
                });
+
+            
+    }
+    ngAfterViewChecked(){
+        
+        this.getTotals();
+    }
+    getTotals(){
+        
+        
+        this.totalUniqueItems = 0;
+        this.totalRetailPrice = 0;
+        this.totalSellingPrice = 0;
+        this.totalDetailedItems = 0;
+        for(let item of this.itemList){
+            //console.log(item.salePrice)
+            let saleprice = item.salePrice?Number(item.salePrice):0;
+            let sellingprice = item.sellingPrice?Number(item.sellingPrice):0;
+            let quantity = this.getTotalQuantity(item.itemDetails);
+            this.totalDetailedItems = this.totalDetailedItems + quantity;
+
+            this.totalUniqueItems = this.totalUniqueItems + 1;
+            this.totalRetailPrice = this.totalRetailPrice + (saleprice * quantity);
+            this.totalSellingPrice = this.totalSellingPrice + (sellingprice * quantity);
+
+
+        }
+
+        
     }
 
    
@@ -263,7 +308,7 @@ export class HomeComponent {
         numbers.push(randomnumber)
         
     }
-        console.log('Random numbers after looping: ' + numbers)
+        //console.log('Random numbers after looping: ' + numbers)
         
         numbers.push(numbers[4])
         numbers.push(numbers[4])
@@ -287,32 +332,32 @@ export class HomeComponent {
         numbers.push(numbers[4])
         numbers.push(numbers[4])
 
-        console.log('Random numbers after copying: ' + numbers)
+        //console.log('Random numbers after copying: ' + numbers)
         return numbers;
       }
 
       
 
       validateScanResult(arr): string{
-          console.log('Entering to validate Scan Result')
-          console.log('Entering to validate Scan Result - Printing array: ' + arr)
+          //console.log('Entering to validate Scan Result')
+          //console.log('Entering to validate Scan Result - Printing array: ' + arr)
 
           if(this.scanIsProcessing == true){
-            console.log("Entering to validate Scan Result-Blocked attempt to look for item while processing is in progress for " + arr)
+           // console.log("Entering to validate Scan Result-Blocked attempt to look for item while processing is in progress for " + arr)
             this.codes = [];  
             document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
             return "";  
         }
 
         if(this.codeValdiationResult!= ""){
-            console.log('Entering to validate Scan Result - Printing codevalidationresult from function: returning, code validation result is not empty: ' + this.codeValdiationResult)
+            //console.log('Entering to validate Scan Result - Printing codevalidationresult from function: returning, code validation result is not empty: ' + this.codeValdiationResult)
             return "";
         }
 
         let validCode: string = "";
         let totalElements = arr.length;
         if (totalElements < 30){
-            console.log('Entering to validate Scan Result - Printing codevalidationresult from function: returning because is less than 30' + this.codeValdiationResult)
+            //console.log('Entering to validate Scan Result - Printing codevalidationresult from function: returning because is less than 30' + this.codeValdiationResult)
             validCode = ""
             return "";
         } 
@@ -327,7 +372,7 @@ export class HomeComponent {
         if (totalElements == 30) {            
             if(totalRepeated == totalElements){
                 validCode = duplicatedCode;
-                console.log('Entering to validate Scan Result - returning because valid code is 10' + duplicatedDetails)
+                //console.log('Entering to validate Scan Result - returning because valid code is 10' + duplicatedDetails)
                 return validCode;
             }
         
@@ -349,9 +394,9 @@ export class HomeComponent {
             }
         }
         
-        console.log('Repeated: ' + (totalRepeated))
-        console.log('Total Elements: ' + (totalElements))
-        console.log('Calculation: ' + (totalRepeated/totalElements))
+       // console.log('Repeated: ' + (totalRepeated))
+       // console.log('Total Elements: ' + (totalElements))
+        //console.log('Calculation: ' + (totalRepeated/totalElements))
         
 
         return validCode;
@@ -360,9 +405,9 @@ export class HomeComponent {
 
       findDuplicates = (arr) => {
 
-        console.log('Entering to find duplicates function')
+     //   console.log('Entering to find duplicates function')
         
-        console.log('Entering to find duplicates function - Total elements: ' + arr.length)
+       // console.log('Entering to find duplicates function - Total elements: ' + arr.length)
 
 
 
@@ -391,21 +436,21 @@ export class HomeComponent {
             arrayNumbersTotalRepeated.push(currentNumber)
         }
 
-        console.log('printing array numbers: ' + arrayNumbersTotalRepeated);
+        //console.log('printing array numbers: ' + arrayNumbersTotalRepeated);
 
         let new_sorted_arr_numbers = arrayNumbersTotalRepeated.slice().sort(function(a, b){return b-a});
 
-        console.log('printing array numbers sorted: ' + new_sorted_arr_numbers);
+       // console.log('printing array numbers sorted: ' + new_sorted_arr_numbers);
 
         let maxRepeated = new_sorted_arr_numbers[0];
 
-        console.log('Entering to find duplicates function max repeated number : ' + maxRepeated)
+        //console.log('Entering to find duplicates function max repeated number : ' + maxRepeated)
 
-        console.log('printing results: ' + results)
+       // console.log('printing results: ' + results)
 
 
         let resultString = String(results.filter(s => s.includes(String(maxRepeated)+"-")));
-        console.log('Entering to find duplicates function index of results:  ' + maxRepeated+"-" + "   actual comparision" + resultString);
+        //console.log('Entering to find duplicates function index of results:  ' + maxRepeated+"-" + "   actual comparision" + resultString);
         
 
         console.log('Entering to find duplicates function - Number found repeated max times: ' + new_sorted_arr_numbers)
@@ -442,7 +487,7 @@ export class HomeComponent {
 
 
       isMobile(){
-          console.log('Checking if is mobile')
+         // console.log('Checking if is mobile')
         if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
             this.isMobileGlobal = true;
             return true;
@@ -475,6 +520,8 @@ export class HomeComponent {
         })
       }
 
+      
+
 
       getTotalQuantity(itemDetails: ItemDetails[]){
         let totalQuantity = 0;
@@ -500,7 +547,7 @@ export class HomeComponent {
         }
 
         if(this.scanIsProcessing == true){
-            console.log("Blocked attempt to look for item while processing is in progress for " + this.formUPCSearch.upcText.value)
+           // console.log("Blocked attempt to look for item while processing is in progress for " + this.formUPCSearch.upcText.value)
             return false;  
         }
 
@@ -591,8 +638,8 @@ export class HomeComponent {
         },dismiss=>{
             //if(isMobileSearch){
                 this.scanIsProcessing = false;
-                document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
-                
+               // document.getElementById("labelPercentage").innerHTML="Scan Accuracy: 0%";
+                this.ngOnInit();
             //}
             this.scanFinished = false;
         })
@@ -610,6 +657,7 @@ export class HomeComponent {
            });
 
            if(item.itemDetails){
+               
             this.editItemForm.patchValue({
                 sellingPrice: item.sellingPrice,
                 category:  item.category.name?item.category.name:''
@@ -659,7 +707,7 @@ export class HomeComponent {
 
         onSubmit() {
             this.modalService.dismissAll();
-            console.log("res:", this.editItemForm.getRawValue());
+            //console.log("res:", this.editItemForm.getRawValue());
            }
 
 
@@ -751,7 +799,7 @@ export class HomeComponent {
                 return;
             }
 
-            console.log('Continued')
+           // console.log('Continued')
     
             let categoryToAddItey = new ItemCategory(this.formItemDetails.categorySelect.value ,'');
             this.currentItem.sellingPrice=this.formItemDetails.sellingPrice.value;
@@ -766,7 +814,7 @@ export class HomeComponent {
                 .pipe(first())
                 .subscribe({
                     next: (response: any) => {
-                        console.log(response.itemId);
+                       // console.log(response.itemId);
                         this.itemDetailsModalItemId = response.itemId;
                         this.currentItem.itemId = response.itemId;
                         this.alertService.clear();
@@ -800,12 +848,16 @@ export class HomeComponent {
             .pipe(first())
             .subscribe({
                 next: (response: any) => {
-                    console.log(response.itemId);
+                  //  console.log(response.itemId);
                     this.itemDetailsModalItemId = response.itemId;
                     this.currentItem.itemId = response.itemId;
                     this.alertService.clear();
                     this.alertService.success(messageDisplayed, { keepAfterRouteChange: true });
+                    
+                   console.log('Saving details edited: ' + this.categoryList[Number(this.formItemDetails.categorySelect.value) - 1])
+                   console.log(this.currentItem.category)
                     this.formItemDetails.category.setValue(this.categoryList[Number(this.formItemDetails.categorySelect.value) - 1])
+                    
                     this.formItemDetails.sellingPrice.disable();
                     //this.itemDetailsModalTotalStock = 0;
                     this.processingAddDatabase = false;
@@ -826,6 +878,7 @@ export class HomeComponent {
             );
 
         }
+        
         }
 
 
@@ -841,9 +894,9 @@ export class HomeComponent {
 
            let itemDetailsAdded: string;
 
-            console.log('date value: ' + this.formAddItemDetails.addEditExpirationDate.value)
+           // console.log('date value: ' + this.formAddItemDetails.addEditExpirationDate.value)
             this.processingAddItemDetailsDatabase = true;
-            console.log('Getting item quanityty value: ' + Number(this.formAddItemDetails.quantityAdd.value))
+            //console.log('Getting item quanityty value: ' + Number(this.formAddItemDetails.quantityAdd.value))
 
             if((this.formAddItemDetails.quantityAdd.value == "" || Number(this.formAddItemDetails.quantityAdd.value) <=0 ) ){
                 this.alertService.clear();
@@ -860,7 +913,7 @@ export class HomeComponent {
 
 
            
-            console.log(this.datepipe.transform(this.formAddItemDetails.addEditExpirationDate.value,"yyyy-MM-dd'T'HH:mm:ss.SSS")); //output : 2018-02-13
+           // console.log(this.datepipe.transform(this.formAddItemDetails.addEditExpirationDate.value,"yyyy-MM-dd'T'HH:mm:ss.SSS")); //output : 2018-02-13
 
 
 
@@ -870,7 +923,7 @@ export class HomeComponent {
             .pipe(first())
             .subscribe({
                 next: (response: any) => {
-                    console.log(response);
+                    //console.log(response);
                     itemDetailsAdded = response.itemDetailsId;
                 this.processingAddItemDetailsDatabase = false;
                 if(this.formAddItemDetails.addEditExpirationDate.value != ""){
@@ -940,7 +993,7 @@ export class HomeComponent {
         }
 
         moveEnter(event) {
-            console.log('entering')
+           // console.log('entering')
            // if (event.keyCode === 13) {
             event.srcElement.nextElementSibling.focus();
                 //this.elementRef.nativeElement.focus();
