@@ -12,6 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { stringify } from '@angular/compiler/src/util';
 import Quagga from 'quagga';
 import { BeepService } from './beep.service';
+import { FilterPipe } from '../filter.pipe'
 
 @Component({ templateUrl: 'home.component.html',
 styleUrls: ['./home.component.css'] })
@@ -76,7 +77,7 @@ export class HomeComponent {
     items$: Observable<Item[]>;
     formFilter: FormGroup;
 
-    constructor(private changeDetectorRef: ChangeDetectorRef,private beepService: BeepService,private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal, private activeModal: NgbActiveModal, public datepipe: DatePipe, private alertService: AlertService,private router: Router, private route: ActivatedRoute,private elementRef: ElementRef) { }
+    constructor(private pipeFilter: FilterPipe,private changeDetectorRef: ChangeDetectorRef,private beepService: BeepService,private accountService: AccountService,private fb: FormBuilder, private modalService: NgbModal, private activeModal: NgbActiveModal, public datepipe: DatePipe, private alertService: AlertService,private router: Router, private route: ActivatedRoute,private elementRef: ElementRef) { }
 
     // convenience getter for easy access to form fields
     get f() { return this.formSearch.controls; }
@@ -233,12 +234,15 @@ export class HomeComponent {
     }
     getTotals(){
         
+
+        let tempItems:any[] = this.pipeFilter.transform(this.itemList,this.searchNameMain);
+
         
         this.totalUniqueItems = 0;
         this.totalRetailPrice = 0;
         this.totalSellingPrice = 0;
         this.totalDetailedItems = 0;
-        for(let item of this.itemList){
+        for(let item of tempItems){
             //console.log(item.salePrice)
             let saleprice = item.salePrice?Number(item.salePrice):0;
             let sellingprice = item.sellingPrice?Number(item.sellingPrice):0;

@@ -6,7 +6,7 @@ import { Item } from './_models/item';
 })
 export class FilterPipe implements PipeTransform {
 
-  transform(value: any, sName:string): unknown {
+  transform(value: any, sName:string): any[] {
    
     sName = sName.toLowerCase();
     if(sName===""){
@@ -54,7 +54,7 @@ export class FilterPipe implements PipeTransform {
     }
 
 
-    console.log('printing templates' + tempItems.length)
+    
     return tempItems;
   }
 

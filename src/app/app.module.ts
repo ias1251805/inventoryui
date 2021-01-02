@@ -42,6 +42,7 @@ import { FilterPipe } from './filter.pipe'
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
         { provide: DatePipe},
+        { provide: FilterPipe},
 
         // provider used to create fake backend
         fakeBackendProvider
